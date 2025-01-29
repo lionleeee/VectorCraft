@@ -1,11 +1,7 @@
-import { MainLayout } from "./components/Layout/MainLayout";
+import { Editor } from "./pages/Editor/Editor";
 
 function App() {
-  return (
-    <MainLayout>
-      <div className="w-full h-full bg-white">{/* 캔버스 영역 */}</div>
-    </MainLayout>
-  );
+  return <Editor />;
 }
 
 export default App;
