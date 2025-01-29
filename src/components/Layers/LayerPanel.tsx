@@ -1,4 +1,3 @@
-import { BsTrash } from "react-icons/bs";
 import { IconButton } from "../common/Button/IconButton";
 import { PanelContainer } from "../common/PanelContainer/PanelContainer";
 import { ICONS } from "@/constants/icons";
