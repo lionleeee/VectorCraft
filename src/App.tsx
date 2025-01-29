@@ -1,4 +1,4 @@
-import { Editor } from "./pages/Editor/Editor";
+import { Editor } from "@/pages/Editor/Editor";
 
 function App() {
   return <Editor />;
