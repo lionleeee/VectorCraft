@@ -1,7 +1,7 @@
-import { Editor } from "@/pages/Editor/Editor";
+import { EditorPage } from "@/pages/Editor";
 
 function App() {
-  return <Editor />;
+  return <EditorPage />;
 }
 
 export default App;
