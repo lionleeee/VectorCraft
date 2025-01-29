@@ -1,11 +1,8 @@
+import { MainLayoutProps } from "@/types/components/layout";
 import { Header } from "./Header";
 import { ToolPanel } from "../Tools/ToolPanel";
 import { SettingsPanel } from "../Settings/SettingsPanel";
 import { LayerPanel } from "../Layers/LayerPanel";
-
-interface MainLayoutProps {
-  children: React.ReactNode;
-}
 
 export const MainLayout = ({ children }: MainLayoutProps) => {
   return (

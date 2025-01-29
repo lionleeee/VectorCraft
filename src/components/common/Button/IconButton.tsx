@@ -1,7 +1,4 @@
-interface IconButtonProps
-  extends React.ButtonHTMLAttributes<HTMLButtonElement> {
-  icon: React.ReactNode;
-}
+import { IconButtonProps } from "@/types/components/button";
 
 export const IconButton = ({
   icon,

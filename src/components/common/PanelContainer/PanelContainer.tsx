@@ -1,7 +1,5 @@
-export interface PanelContainerProps {
-  children: React.ReactNode;
-  className?: string;
-}
+import { PanelContainerProps } from "@/types/components/panelContainer";
+
 export const PanelContainer = ({
   children,
   className = "",
