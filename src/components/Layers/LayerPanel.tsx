@@ -1,6 +1,7 @@
 import { BsTrash } from "react-icons/bs";
 import { IconButton } from "../common/Button/IconButton";
 import { PanelContainer } from "../common/PanelContainer/PanelContainer";
+import { ICONS } from "@/constants/icons";
 
 export const LayerPanel = () => {
   return (
@@ -10,7 +11,7 @@ export const LayerPanel = () => {
         <span>rect - 1</span>
         <IconButton
           className="ml-auto"
-          icon={<BsTrash className="w-5 h-5" />}
+          icon={<ICONS.delete className="w-5 h-5" />}
           title="커서"
         />
       </div>
