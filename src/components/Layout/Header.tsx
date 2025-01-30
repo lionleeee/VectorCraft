@@ -1,12 +1,13 @@
 import { Button } from "../common/Button/Button";
+import { HeaderProps } from "@/types/components/header";
 
-export const Header = () => {
+export const Header = ({ onReset }: HeaderProps) => {
   return (
     <header className="bg-[#F1F2F4]  px-4 py-2 border-b border-gray-300">
       <div className="flex justify-between items-center ">
         <div className="flex items-center gap-4">
           <label className="text-lg ">VectorCraft</label>
-          <Button>초기화</Button>
+          <Button onClick={onReset}>초기화</Button>
         </div>
 
         <div className="flex gap-4 text-sm">

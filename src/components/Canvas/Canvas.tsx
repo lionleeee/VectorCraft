@@ -1,3 +1,20 @@
-export const Canvas = () => {
-  return <div className="w-full h-full bg-white relative">{/* 캔버스  */}</div>;
+import { CanvasProps } from "@/types/components/canvas";
+
+export const Canvas = ({ width, height, backgroundColor }: CanvasProps) => {
+  if (!width || !height) {
+    return null;
+  }
+
+  return (
+    <div
+      className="relative border border-gray-300"
+      style={{
+        width: `${width}px`,
+        height: `${height}px`,
+        backgroundColor,
+      }}
+    >
+      {/* SVG 요소 추가 */}
+    </div>
+  );
 };
