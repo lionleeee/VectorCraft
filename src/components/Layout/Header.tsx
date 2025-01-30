@@ -2,9 +2,13 @@ import { Button } from "../common/Button/Button";
 
 export const Header = () => {
   return (
-    <header className="bg-black text-white px-4 py-2">
+    <header className="bg-[#F1F2F4]  px-4 py-2 border-b border-gray-300">
       <div className="flex justify-between items-center ">
-        <label>VectorCraft</label>
+        <div className="flex items-center gap-4">
+          <label className="text-lg ">VectorCraft</label>
+          <Button>초기화</Button>
+        </div>
+
         <div className="flex gap-4 text-sm">
           <Button>설정 내보내기</Button>
           <Button>설정 불러오기</Button>

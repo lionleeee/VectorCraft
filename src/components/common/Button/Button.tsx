@@ -9,8 +9,8 @@ export const Button = ({
 }: ButtonProps) => {
   return (
     <button
-      className={`
-        ${variant === "ghost" ? "hover:bg-gray-700" : ""}
+      className={`px-2 py-2 rounded-md 
+        ${variant === "ghost" ? "hover:bg-[#DDE0E5]" : ""}
         ${size === "sm" ? "text-sm" : ""}
         ${className}
       `}

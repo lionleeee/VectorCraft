@@ -6,7 +6,7 @@ import { ToolPanel } from "./components/Tools/ToolPanel";
 import { LayerPanel } from "./components/Layers/LayerPanel";
 import { Container } from "@/components/Layout/Container";
 import { Content } from "@/components/Layout/Content";
-import { PanelContainer } from "@/components/Layout/PanelContainer/PanelContainer";
+import { PanelContainer } from "@/components/Layout/PanelContainer";
 
 export const EditorPage = () => {
   return (
