@@ -57,6 +57,7 @@ export const EditorPage = () => {
         </Content>
         <PanelContainer position="right" width={256} className="p-4">
           <SettingsPanel
+            selectedTool={selectedTool}
             backgroundColor={canvasProps?.backgroundColor || "#FFFFFF"}
             onChangeBackgroundColor={handleChangeBackgroundColor}
           />
