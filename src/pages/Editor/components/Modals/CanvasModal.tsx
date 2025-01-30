@@ -6,7 +6,7 @@ export const CreateCanvasModal = ({
   onClose,
   onCreate,
 }: CreateCanvasModalProps) => {
-  const [width, setWidth] = useState(800);
+  const [width, setWidth] = useState(600);
   const [height, setHeight] = useState(600);
   const [backgroundColor, setBackgroundColor] = useState("#FFFFFF");
 
@@ -27,7 +27,8 @@ export const CreateCanvasModal = ({
               value={width}
               onChange={(e) => setWidth(Number(e.target.value))}
               className="w-full border rounded px-2 py-1"
-              min={1}
+              min={100}
+              max={2000}
             />
           </div>
           <div>
@@ -37,7 +38,8 @@ export const CreateCanvasModal = ({
               value={height}
               onChange={(e) => setHeight(Number(e.target.value))}
               className="w-full border rounded px-2 py-1"
-              min={1}
+              min={100}
+              max={2000}
             />
           </div>
           <div>
