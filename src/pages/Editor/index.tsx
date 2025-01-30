@@ -27,6 +27,12 @@ export const EditorPage = () => {
     setShowCanvasModal(false);
   };
 
+  const handleChangeBackgroundColor = (color: string) => {
+    setCanvasProps((prev) =>
+      prev ? { ...prev, backgroundColor: color } : prev
+    );
+  };
+
   const handleResetCanvas = () => {
     setShowCanvasModal(true);
   };
@@ -42,7 +48,10 @@ export const EditorPage = () => {
           <Canvas {...canvasProps} />
         </Content>
         <PanelContainer position="right" width={256} className="p-4">
-          <SettingsPanel />
+          <SettingsPanel
+            backgroundColor={canvasProps?.backgroundColor || "#FFFFFF"}
+            onChangeBackgroundColor={handleChangeBackgroundColor}
+          />
         </PanelContainer>
       </Container>
       <PanelContainer position="bottom" height={220} className="p-4">
