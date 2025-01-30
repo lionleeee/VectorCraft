@@ -3,6 +3,7 @@ import { SettingsPanelProps } from "@/types/components/settings";
 export const SettingsPanel = ({
   backgroundColor,
   onChangeBackgroundColor,
+  selectedTool,
 }: SettingsPanelProps) => {
   return (
     <div className="space-y-4">

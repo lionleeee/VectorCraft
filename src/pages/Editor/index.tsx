@@ -9,6 +9,7 @@ import { Container } from "@/components/Layout/Container";
 import { Content } from "@/components/Layout/Content";
 import { PanelContainer } from "@/components/Layout/PanelContainer";
 import { CreateCanvasModal } from "./components/Modals/CanvasModal";
+import { ToolType } from "@/types/components/tools";
 
 export const EditorPage = () => {
   const [showCanvasModal, setShowCanvasModal] = useState(true);
@@ -17,6 +18,10 @@ export const EditorPage = () => {
     height?: number;
     backgroundColor?: string;
   }>();
+  const [selectedTool, setSelectedTool] = useState<ToolType>("cursor");
+  const handleSelectTool = (tool: ToolType) => {
+    setSelectedTool(tool);
+  };
 
   const handleCreateCanvas = (
     width: number,
@@ -42,7 +47,10 @@ export const EditorPage = () => {
       <Header onReset={handleResetCanvas} />
       <Container>
         <PanelContainer position="left" width={48}>
-          <ToolPanel />
+          <ToolPanel
+            selectedTool={selectedTool}
+            onSelectTool={handleSelectTool}
+          />
         </PanelContainer>
         <Content>
           <Canvas {...canvasProps} />
