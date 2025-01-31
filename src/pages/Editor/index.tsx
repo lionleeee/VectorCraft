@@ -2,13 +2,14 @@ import { useState } from "react";
 import { Canvas } from "@/components/Canvas/Canvas";
 import { BaseLayout } from "@/components/Layout/BaseLayout";
 import { Header } from "@/components/Layout/Header";
-import { SettingsPanel } from "./components/Settings/SettingsPanel";
-import { ToolPanel } from "./components/Tools/ToolPanel";
-import { LayerPanel } from "./components/Layers/LayerPanel";
+import { SettingsPanel } from "@/pages/Editor/components/Settings/SettingsPanel";
+import { ToolPanel } from "@/pages/Editor/components/Tools/ToolPanel";
+import { LayerPanel } from "@/pages/Editor/components/Layers/LayerPanel";
 import { Container } from "@/components/Layout/Container";
 import { Content } from "@/components/Layout/Content";
 import { PanelContainer } from "@/components/Layout/PanelContainer";
-import { CreateCanvasModal } from "./components/Modals/CanvasModal";
+import { CreateCanvasModal } from "@/pages/Editor/components/Modals/CanvasModal";
+import { ToolType } from "@/types/components/tools";
 
 export const EditorPage = () => {
   const [showCanvasModal, setShowCanvasModal] = useState(true);
@@ -17,6 +18,10 @@ export const EditorPage = () => {
     height?: number;
     backgroundColor?: string;
   }>();
+  const [selectedTool, setSelectedTool] = useState<ToolType>("cursor");
+  const handleSelectTool = (tool: ToolType) => {
+    setSelectedTool(tool);
+  };
 
   const handleCreateCanvas = (
     width: number,
@@ -42,13 +47,17 @@ export const EditorPage = () => {
       <Header onReset={handleResetCanvas} />
       <Container>
         <PanelContainer position="left" width={48}>
-          <ToolPanel />
+          <ToolPanel
+            selectedTool={selectedTool}
+            onSelectTool={handleSelectTool}
+          />
         </PanelContainer>
         <Content>
           <Canvas {...canvasProps} />
         </Content>
         <PanelContainer position="right" width={256} className="p-4">
           <SettingsPanel
+            selectedTool={selectedTool}
             backgroundColor={canvasProps?.backgroundColor || "#FFFFFF"}
             onChangeBackgroundColor={handleChangeBackgroundColor}
           />
