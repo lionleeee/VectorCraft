@@ -1,12 +1,14 @@
 import { create } from "zustand";
 import { Shape, CreateShapeProps, ShapeType } from "@/types/shape";
 import { createShape } from "@/utils/shapeFactory";
+import { MouseState, Point } from "@/types/mouse";
 
 interface EditorState {
   shapes: Shape[];
   selectedShapeId: string | null;
   selectedTool: ShapeType | "cursor";
   isDragging: boolean;
+  mouse: MouseState;
 
   addShape: (props: CreateShapeProps) => void;
   updateShape: <T extends Shape>(
@@ -17,6 +19,9 @@ interface EditorState {
   selectShape: (id: string | null) => void;
   setSelectedTool: (tool: ShapeType | "cursor") => void;
   setIsDragging: (isDragging: boolean) => void;
+  startDrawing: (point: Point) => void;
+  updateDrawing: (point: Point) => void;
+  endDrawing: () => void;
 }
 
 export const useEditorStore = create<EditorState>((set) => ({
@@ -24,6 +29,11 @@ export const useEditorStore = create<EditorState>((set) => ({
   selectedShapeId: null,
   selectedTool: "cursor",
   isDragging: false,
+  mouse: {
+    isDrawing: false,
+    startPoint: null,
+    endPoint: null,
+  },
 
   addShape: (props) =>
     set((state) => ({
@@ -64,4 +74,33 @@ export const useEditorStore = create<EditorState>((set) => ({
     set({
       isDragging,
     }),
+
+  startDrawing: (point) =>
+    set((state) => ({
+      ...state,
+      mouse: {
+        isDrawing: true,
+        startPoint: point,
+        endPoint: point,
+      },
+    })),
+
+  updateDrawing: (point) =>
+    set((state) => ({
+      ...state,
+      mouse: {
+        ...state.mouse,
+        endPoint: point,
+      },
+    })),
+
+  endDrawing: () =>
+    set((state) => ({
+      ...state,
+      mouse: {
+        isDrawing: false,
+        startPoint: null,
+        endPoint: null,
+      },
+    })),
 }));
