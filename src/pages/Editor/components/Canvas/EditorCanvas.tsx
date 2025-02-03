@@ -3,12 +3,26 @@ import { CanvasProps } from "@/types/components/canvas";
 import { useEditorStore } from "@/store/useEditorStore";
 import { Point } from "@/types/mouse";
 
+import { Shape } from "@/types/shape";
+import { Circle } from "./shapes/Circle";
+import { Polygon } from "./shapes/Polygon";
+import { Rectangle } from "./shapes/Rectangle";
+
+const ShapeComponents: Record<
+  Shape["type"],
+  React.ComponentType<{ shape: Shape }>
+> = {
+  rectangle: Rectangle as React.ComponentType<{ shape: Shape }>,
+  circle: Circle as React.ComponentType<{ shape: Shape }>,
+  polygon: Polygon as React.ComponentType<{ shape: Shape }>,
+};
+
 export const EditorCanvas = ({
   width,
   height,
   backgroundColor,
 }: CanvasProps) => {
-  const { startDrawing, updateDrawing, endDrawing } = useEditorStore();
+  const { shapes, startDrawing, updateDrawing, endDrawing } = useEditorStore();
 
   const getCanvasPoint = useCallback((e: React.MouseEvent): Point => {
     const rect = e.currentTarget.getBoundingClientRect();
@@ -38,6 +52,11 @@ export const EditorCanvas = ({
     endDrawing();
   }, [endDrawing]);
 
+  const renderShape = (shape: Shape) => {
+    const Component = ShapeComponents[shape.type];
+    return <Component key={shape.id} shape={shape} />;
+  };
+
   if (!width || !height) {
     return null;
   }
@@ -55,7 +74,9 @@ export const EditorCanvas = ({
       onMouseUp={handleMouseUp}
       onMouseLeave={handleMouseUp}
     >
-      {/* SVG 요소 추가 */}
+      <svg width={width} height={height}>
+        {shapes.map(renderShape)}
+      </svg>
     </div>
   );
 };
