@@ -7,6 +7,7 @@ interface SelectionProps {
 }
 
 const HANDLE_SIZE = 8;
+const ROTATE_HANDLE_OFFSET = 20;
 
 export const Selection = ({ shape, onStartResize }: SelectionProps) => {
   const getBoundingBox = () => {
@@ -47,6 +48,10 @@ export const Selection = ({ shape, onStartResize }: SelectionProps) => {
     onStartResize(handle, point);
   };
 
+  const handleRotateMouseDown = (e: React.MouseEvent) => {
+    e.stopPropagation();
+  };
+
   const renderHandle = (position: string, x: number, y: number) => (
     <rect
       x={x - HANDLE_SIZE / 2}
@@ -78,6 +83,25 @@ export const Selection = ({ shape, onStartResize }: SelectionProps) => {
       {renderHandle("ne", box.x + box.width, box.y)}
       {renderHandle("se", box.x + box.width, box.y + box.height)}
       {renderHandle("sw", box.x, box.y + box.height)}
+
+      <line
+        x1={box.x + box.width / 2}
+        y1={box.y}
+        x2={box.x + box.width / 2}
+        y2={box.y - ROTATE_HANDLE_OFFSET}
+        stroke="#0B7FFF"
+        strokeWidth={1}
+      />
+      <circle
+        cx={box.x + box.width / 2}
+        cy={box.y - ROTATE_HANDLE_OFFSET}
+        r={4}
+        fill="white"
+        stroke="#0B7FFF"
+        strokeWidth={1}
+        style={{ cursor: "grab" }}
+        onMouseDown={handleRotateMouseDown}
+      />
     </g>
   );
 };
