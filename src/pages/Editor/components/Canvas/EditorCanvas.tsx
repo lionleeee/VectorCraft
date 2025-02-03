@@ -14,6 +14,8 @@ import { Polygon } from "./shapes/Polygon";
 import { Rectangle } from "./shapes/Rectangle";
 import { calculateShapeDimensions } from "@/utils/shapeCalculator";
 import { Preview } from "./Preview";
+import { Selection } from "./Selection";
+import { isPointInShape } from "@/utils/shapeHelpers";
 
 const ShapeComponents: Record<
   Shape["type"],
@@ -32,11 +34,13 @@ export const EditorCanvas = ({
   const {
     shapes,
     selectedTool,
+    selectedShapeId,
     mouse,
     startDrawing,
     updateDrawing,
     endDrawing,
     addShape,
+    selectShape,
   } = useEditorStore();
 
   const getCanvasPoint = useCallback((e: React.MouseEvent): Point => {
@@ -49,11 +53,26 @@ export const EditorCanvas = ({
 
   const handleMouseDown = useCallback(
     (e: React.MouseEvent) => {
-      if (selectedTool === "cursor") return;
+      if (selectedTool === "cursor") {
+        //1. 마우스 클릭 좌표 확인
+        const point = getCanvasPoint(e);
+        for (let i = shapes.length - 1; i >= 0; i--) {
+          //2. 도형 확인
+          if (isPointInShape(point, shapes[i])) {
+            //3-1. 도형 찾을 경우
+            selectShape(shapes[i].id);
+            return;
+          }
+        }
+        //3-2. 도형 못 찾을 경우
+        selectShape(null);
+        return;
+      }
+
       const point = getCanvasPoint(e);
       startDrawing(point);
     },
-    [startDrawing, getCanvasPoint, selectedTool]
+    [selectedTool, shapes, selectShape, startDrawing, getCanvasPoint]
   );
 
   const handleMouseMove = useCallback(
@@ -153,6 +172,11 @@ export const EditorCanvas = ({
       <svg width={width} height={height}>
         {shapes.map(renderShape)}
         <Preview renderShape={renderShape} />
+        {selectedShapeId && (
+          <Selection
+            shape={shapes.find((shape) => shape.id === selectedShapeId)!}
+          />
+        )}
       </svg>
     </div>
   );
