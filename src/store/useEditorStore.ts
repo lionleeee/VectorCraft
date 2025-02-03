@@ -5,12 +5,19 @@ import { MouseState, Point } from "@/types/mouse";
 import { ToolType } from "@/types/components/tools";
 import { nanoid } from "nanoid";
 
+interface DragState {
+  isDragging: boolean;
+  startPoint: Point | null;
+  offset: Point | null;
+}
+
 interface EditorState {
   shapes: Shape[];
   selectedShapeId: string | null;
   selectedTool: ToolType;
   isDragging: boolean;
   mouse: MouseState;
+  drag: DragState;
 
   addShape: (shape: Shape) => void;
   updateShape: <T extends Shape>(
@@ -24,6 +31,9 @@ interface EditorState {
   startDrawing: (point: Point) => void;
   updateDrawing: (point: Point) => void;
   endDrawing: () => void;
+  startDragging: (point: Point, offset: Point) => void;
+  updateDragging: (point: Point) => void;
+  endDragging: () => void;
 }
 
 export const useEditorStore = create<EditorState>((set) => ({
@@ -35,6 +45,11 @@ export const useEditorStore = create<EditorState>((set) => ({
     isDrawing: false,
     startPoint: null,
     endPoint: null,
+  },
+  drag: {
+    isDragging: false,
+    startPoint: null,
+    offset: null,
   },
 
   addShape: (shape) =>
@@ -105,6 +120,55 @@ export const useEditorStore = create<EditorState>((set) => ({
         isDrawing: false,
         startPoint: null,
         endPoint: null,
+      },
+    })),
+
+  startDragging: (point, offset) =>
+    set((state) => ({
+      ...state,
+      drag: {
+        isDragging: true,
+        startPoint: point,
+        offset,
+      },
+    })),
+
+  updateDragging: (point) =>
+    set((state) => {
+      if (
+        !state.drag.isDragging ||
+        !state.drag.startPoint ||
+        !state.drag.offset ||
+        !state.selectedShapeId
+      ) {
+        return state;
+      }
+
+      const dx = point.x - state.drag.startPoint.x;
+      const dy = point.y - state.drag.startPoint.y;
+      const offset = state.drag.offset as Point;
+
+      return {
+        ...state,
+        shapes: state.shapes.map((shape) =>
+          shape.id === state.selectedShapeId
+            ? {
+                ...shape,
+                x: offset.x + dx,
+                y: offset.y + dy,
+              }
+            : shape
+        ),
+      };
+    }),
+
+  endDragging: () =>
+    set((state) => ({
+      ...state,
+      drag: {
+        isDragging: false,
+        startPoint: null,
+        offset: null,
       },
     })),
 }));

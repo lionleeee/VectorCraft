@@ -36,11 +36,15 @@ export const EditorCanvas = ({
     selectedTool,
     selectedShapeId,
     mouse,
+    drag,
     startDrawing,
     updateDrawing,
     endDrawing,
     addShape,
     selectShape,
+    startDragging,
+    updateDragging,
+    endDragging,
   } = useEditorStore();
 
   const getCanvasPoint = useCallback((e: React.MouseEvent): Point => {
@@ -53,14 +57,16 @@ export const EditorCanvas = ({
 
   const handleMouseDown = useCallback(
     (e: React.MouseEvent) => {
+      //1. 마우스 클릭 좌표 확인
+      const point = getCanvasPoint(e);
       if (selectedTool === "cursor") {
-        //1. 마우스 클릭 좌표 확인
-        const point = getCanvasPoint(e);
+        //2. 도형 확인
         for (let i = shapes.length - 1; i >= 0; i--) {
-          //2. 도형 확인
           if (isPointInShape(point, shapes[i])) {
             //3-1. 도형 찾을 경우
             selectShape(shapes[i].id);
+            // 드래그 시작
+            startDragging(point, { x: shapes[i].x, y: shapes[i].y });
             return;
           }
         }
@@ -69,22 +75,48 @@ export const EditorCanvas = ({
         return;
       }
 
-      const point = getCanvasPoint(e);
       startDrawing(point);
     },
-    [selectedTool, shapes, selectShape, startDrawing, getCanvasPoint]
+    [
+      selectedTool,
+      shapes,
+      selectShape,
+      startDrawing,
+      getCanvasPoint,
+      startDragging,
+    ]
   );
 
   const handleMouseMove = useCallback(
     (e: React.MouseEvent) => {
-      if (!mouse.isDrawing || selectedTool === "cursor") return;
       const point = getCanvasPoint(e);
+
+      if (selectedTool === "cursor") {
+        if (drag.isDragging) {
+          updateDragging(point);
+        }
+        return;
+      }
+
+      if (!mouse.isDrawing) return;
       updateDrawing(point);
     },
-    [updateDrawing, getCanvasPoint, mouse.isDrawing, selectedTool]
+    [
+      selectedTool,
+      mouse.isDrawing,
+      drag.isDragging,
+      updateDrawing,
+      updateDragging,
+      getCanvasPoint,
+    ]
   );
 
   const handleMouseUp = useCallback(() => {
+    if (drag.isDragging) {
+      endDragging();
+      return;
+    }
+
     if (
       !mouse.isDrawing ||
       !mouse.startPoint ||
@@ -145,7 +177,7 @@ export const EditorCanvas = ({
 
     addShape(shape);
     endDrawing();
-  }, [mouse, selectedTool, addShape, endDrawing]);
+  }, [drag.isDragging, endDragging, mouse, selectedTool, addShape, endDrawing]);
 
   const renderShape = (shape: Shape) => {
     const Component = ShapeComponents[shape.type];
