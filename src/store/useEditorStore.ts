@@ -206,7 +206,8 @@ export const useEditorStore = create<EditorState>((set) => ({
         !state.resize.isResizing ||
         !state.resize.startPoint ||
         !state.resize.initialShape ||
-        !state.selectedShapeId
+        !state.selectedShapeId ||
+        !state.resize.handle
       ) {
         return state;
       }
@@ -214,6 +215,7 @@ export const useEditorStore = create<EditorState>((set) => ({
       const dx = point.x - state.resize.startPoint.x;
       const dy = point.y - state.resize.startPoint.y;
       const initialShape = state.resize.initialShape;
+      const handle = state.resize.handle;
 
       return {
         ...state,
@@ -221,17 +223,41 @@ export const useEditorStore = create<EditorState>((set) => ({
           if (shape.id !== state.selectedShapeId) return shape;
 
           if (shape.type === "rectangle" && initialShape.type === "rectangle") {
-            const width = Math.max(10, initialShape.width + dx);
-            const height = Math.max(10, initialShape.height + dy);
-            return { ...shape, width, height };
+            let width = initialShape.width;
+            let height = initialShape.height;
+            let x = initialShape.x;
+            let y = initialShape.y;
+
+            switch (handle) {
+              case "se":
+                width = Math.max(10, initialShape.width + dx);
+                height = Math.max(10, initialShape.height + dy);
+                break;
+              case "sw":
+                width = Math.max(10, initialShape.width - dx);
+                height = Math.max(10, initialShape.height + dy);
+                x = initialShape.x + dx;
+                break;
+              case "ne":
+                width = Math.max(10, initialShape.width + dx);
+                height = Math.max(10, initialShape.height - dy);
+                y = initialShape.y + dy;
+                break;
+              case "nw":
+                width = Math.max(10, initialShape.width - dx);
+                height = Math.max(10, initialShape.height - dy);
+                x = initialShape.x + dx;
+                y = initialShape.y + dy;
+                break;
+            }
+
+            return { ...shape, x, y, width, height };
           }
 
-          if (shape.type === "circle" && initialShape.type === "circle") {
-            const radius = Math.max(10, initialShape.radius + Math.max(dx, dy));
-            return { ...shape, radius };
-          }
-
-          if (shape.type === "polygon" && initialShape.type === "polygon") {
+          if (
+            (shape.type === "circle" || shape.type === "polygon") &&
+            initialShape.type === shape.type
+          ) {
             const radius = Math.max(10, initialShape.radius + Math.max(dx, dy));
             return { ...shape, radius };
           }
