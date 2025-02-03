@@ -7,6 +7,7 @@ import { Shape } from "@/types/shape";
 import { Circle } from "./shapes/Circle";
 import { Polygon } from "./shapes/Polygon";
 import { Rectangle } from "./shapes/Rectangle";
+import { calculateShapeDimensions } from "@/utils/shapeCalculator";
 
 const ShapeComponents: Record<
   Shape["type"],
@@ -22,7 +23,15 @@ export const EditorCanvas = ({
   height,
   backgroundColor,
 }: CanvasProps) => {
-  const { shapes, startDrawing, updateDrawing, endDrawing } = useEditorStore();
+  const {
+    shapes,
+    selectedTool,
+    mouse,
+    startDrawing,
+    updateDrawing,
+    endDrawing,
+    addShape,
+  } = useEditorStore();
 
   const getCanvasPoint = useCallback((e: React.MouseEvent): Point => {
     const rect = e.currentTarget.getBoundingClientRect();
@@ -34,23 +43,52 @@ export const EditorCanvas = ({
 
   const handleMouseDown = useCallback(
     (e: React.MouseEvent) => {
+      if (selectedTool === "cursor") return;
       const point = getCanvasPoint(e);
       startDrawing(point);
     },
-    [startDrawing, getCanvasPoint]
+    [startDrawing, getCanvasPoint, selectedTool]
   );
 
   const handleMouseMove = useCallback(
     (e: React.MouseEvent) => {
+      if (!mouse.isDrawing || selectedTool === "cursor") return;
       const point = getCanvasPoint(e);
       updateDrawing(point);
     },
-    [updateDrawing, getCanvasPoint]
+    [updateDrawing, getCanvasPoint, mouse.isDrawing, selectedTool]
   );
 
   const handleMouseUp = useCallback(() => {
+    if (
+      !mouse.isDrawing ||
+      !mouse.startPoint ||
+      !mouse.endPoint ||
+      selectedTool === "cursor"
+    ) {
+      endDrawing();
+      return;
+    }
+
+    const dimensions = calculateShapeDimensions({
+      startPoint: mouse.startPoint,
+      endPoint: mouse.endPoint,
+      type: selectedTool,
+    });
+
+    addShape({
+      type: selectedTool,
+      ...dimensions,
+      styles: {
+        fill: "#000",
+        stroke: "#000000",
+        strokeWidth: 1,
+        rotation: 0,
+      },
+    });
+
     endDrawing();
-  }, [endDrawing]);
+  }, [mouse, selectedTool, addShape, endDrawing]);
 
   const renderShape = (shape: Shape) => {
     const Component = ShapeComponents[shape.type];

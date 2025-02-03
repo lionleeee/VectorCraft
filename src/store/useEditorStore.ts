@@ -1,12 +1,13 @@
 import { create } from "zustand";
-import { Shape, CreateShapeProps, ShapeType } from "@/types/shape";
+import { Shape, CreateShapeProps } from "@/types/shape";
 import { createShape } from "@/utils/shapeFactory";
 import { MouseState, Point } from "@/types/mouse";
+import { ToolType } from "@/types/components/tools";
 
 interface EditorState {
   shapes: Shape[];
   selectedShapeId: string | null;
-  selectedTool: ShapeType | "cursor";
+  selectedTool: ToolType;
   isDragging: boolean;
   mouse: MouseState;
 
@@ -17,7 +18,7 @@ interface EditorState {
   ) => void;
   deleteShape: (id: string) => void;
   selectShape: (id: string | null) => void;
-  setSelectedTool: (tool: ShapeType | "cursor") => void;
+  setSelectedTool: (tool: ToolType) => void;
   setIsDragging: (isDragging: boolean) => void;
   startDrawing: (point: Point) => void;
   updateDrawing: (point: Point) => void;
@@ -66,9 +67,10 @@ export const useEditorStore = create<EditorState>((set) => ({
     }),
 
   setSelectedTool: (tool) =>
-    set({
+    set((state) => ({
+      ...state,
       selectedTool: tool,
-    }),
+    })),
 
   setIsDragging: (isDragging) =>
     set({
