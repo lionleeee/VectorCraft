@@ -1,8 +1,9 @@
 import { create } from "zustand";
-import { Shape, CreateShapeProps } from "@/types/shape";
-import { createShape } from "@/utils/shapeFactory";
+import { Shape } from "@/types/shape";
+
 import { MouseState, Point } from "@/types/mouse";
 import { ToolType } from "@/types/components/tools";
+import { nanoid } from "nanoid";
 
 interface EditorState {
   shapes: Shape[];
@@ -11,7 +12,7 @@ interface EditorState {
   isDragging: boolean;
   mouse: MouseState;
 
-  addShape: (props: CreateShapeProps) => void;
+  addShape: (shape: Shape) => void;
   updateShape: <T extends Shape>(
     id: string,
     updates: Partial<Omit<T, "id" | "type">>
@@ -36,9 +37,10 @@ export const useEditorStore = create<EditorState>((set) => ({
     endPoint: null,
   },
 
-  addShape: (props) =>
+  addShape: (shape) =>
     set((state) => ({
-      shapes: [...state.shapes, createShape(props)],
+      ...state,
+      shapes: [...state.shapes, { ...shape, id: nanoid() }],
     })),
 
   updateShape: (id, updates) =>

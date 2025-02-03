@@ -3,11 +3,17 @@ import { CanvasProps } from "@/types/components/canvas";
 import { useEditorStore } from "@/store/useEditorStore";
 import { Point } from "@/types/mouse";
 
-import { Shape } from "@/types/shape";
+import {
+  CircleShape,
+  PolygonShape,
+  RectangleShape,
+  Shape,
+} from "@/types/shape";
 import { Circle } from "./shapes/Circle";
 import { Polygon } from "./shapes/Polygon";
 import { Rectangle } from "./shapes/Rectangle";
 import { calculateShapeDimensions } from "@/utils/shapeCalculator";
+import { Preview } from "./Preview";
 
 const ShapeComponents: Record<
   Shape["type"],
@@ -76,17 +82,49 @@ export const EditorCanvas = ({
       type: selectedTool,
     });
 
-    addShape({
+    const baseShape = {
       type: selectedTool,
-      ...dimensions,
-      styles: {
-        fill: "#000",
-        stroke: "#000000",
-        strokeWidth: 1,
-        rotation: 0,
-      },
-    });
+      fill: "#000",
+      stroke: "#000000",
+      strokeWidth: 1,
+      rotation: 0,
+    };
 
+    let shape: Shape;
+
+    switch (selectedTool) {
+      case "rectangle":
+        shape = {
+          ...baseShape,
+          type: "rectangle",
+          borderRadius: 0,
+          ...dimensions,
+        } as RectangleShape;
+        break;
+
+      case "circle":
+        shape = {
+          ...baseShape,
+          type: "circle",
+          ...dimensions,
+        } as CircleShape;
+        break;
+
+      case "polygon":
+        shape = {
+          ...baseShape,
+          type: "polygon",
+          sides: 3,
+          ...dimensions,
+        } as PolygonShape;
+        break;
+
+      default:
+        endDrawing();
+        return;
+    }
+
+    addShape(shape);
     endDrawing();
   }, [mouse, selectedTool, addShape, endDrawing]);
 
@@ -114,6 +152,7 @@ export const EditorCanvas = ({
     >
       <svg width={width} height={height}>
         {shapes.map(renderShape)}
+        <Preview renderShape={renderShape} />
       </svg>
     </div>
   );
