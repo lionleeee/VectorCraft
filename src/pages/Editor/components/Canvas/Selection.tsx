@@ -1,10 +1,14 @@
 import { Shape } from "@/types/shape";
+import { Point } from "@/types/mouse";
 
 interface SelectionProps {
   shape: Shape;
+  onStartResize: (handle: string, point: Point) => void;
 }
 
-export const Selection = ({ shape }: SelectionProps) => {
+const HANDLE_SIZE = 8;
+
+export const Selection = ({ shape, onStartResize }: SelectionProps) => {
   const getBoundingBox = () => {
     switch (shape.type) {
       case "rectangle":
@@ -29,17 +33,51 @@ export const Selection = ({ shape }: SelectionProps) => {
 
   const box = getBoundingBox();
 
-  return (
+  const handleMouseDown = (e: React.MouseEvent, handle: string) => {
+    e.stopPropagation();
+    // SVG 요소의 좌표계로 변환
+    const svg = e.currentTarget.closest("svg");
+    if (!svg) return;
+
+    const svgRect = svg.getBoundingClientRect();
+    const point = {
+      x: e.clientX - svgRect.left,
+      y: e.clientY - svgRect.top,
+    };
+    onStartResize(handle, point);
+  };
+
+  const renderHandle = (position: string, x: number, y: number) => (
     <rect
-      x={box.x - 1}
-      y={box.y - 1}
-      width={box.width + 2}
-      height={box.height + 2}
-      fill="none"
+      x={x - HANDLE_SIZE / 2}
+      y={y - HANDLE_SIZE / 2}
+      width={HANDLE_SIZE}
+      height={HANDLE_SIZE}
+      fill="white"
       stroke="#0B7FFF"
       strokeWidth={1}
-      strokeDasharray="4 4"
-      pointerEvents="none"
+      style={{ cursor: `${position}-resize` }}
+      onMouseDown={(e) => handleMouseDown(e, position)}
     />
+  );
+
+  return (
+    <g>
+      <rect
+        x={box.x - 1}
+        y={box.y - 1}
+        width={box.width + 2}
+        height={box.height + 2}
+        fill="none"
+        stroke="#0B7FFF"
+        strokeWidth={1}
+        strokeDasharray="4 4"
+        pointerEvents="none"
+      />
+      {renderHandle("nw", box.x, box.y)}
+      {renderHandle("ne", box.x + box.width, box.y)}
+      {renderHandle("se", box.x + box.width, box.y + box.height)}
+      {renderHandle("sw", box.x, box.y + box.height)}
+    </g>
   );
 };

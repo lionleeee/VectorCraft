@@ -11,6 +11,13 @@ interface DragState {
   offset: Point | null;
 }
 
+interface ResizeState {
+  isResizing: boolean;
+  handle: string | null;
+  startPoint: Point | null;
+  initialShape: Shape | null;
+}
+
 interface EditorState {
   shapes: Shape[];
   selectedShapeId: string | null;
@@ -18,6 +25,7 @@ interface EditorState {
   isDragging: boolean;
   mouse: MouseState;
   drag: DragState;
+  resize: ResizeState;
 
   addShape: (shape: Shape) => void;
   updateShape: <T extends Shape>(
@@ -34,6 +42,9 @@ interface EditorState {
   startDragging: (point: Point, offset: Point) => void;
   updateDragging: (point: Point) => void;
   endDragging: () => void;
+  startResize: (handle: string, point: Point, shape: Shape) => void;
+  updateResize: (point: Point) => void;
+  endResize: () => void;
 }
 
 export const useEditorStore = create<EditorState>((set) => ({
@@ -50,6 +61,12 @@ export const useEditorStore = create<EditorState>((set) => ({
     isDragging: false,
     startPoint: null,
     offset: null,
+  },
+  resize: {
+    isResizing: false,
+    handle: null,
+    startPoint: null,
+    initialShape: null,
   },
 
   addShape: (shape) =>
@@ -169,6 +186,69 @@ export const useEditorStore = create<EditorState>((set) => ({
         isDragging: false,
         startPoint: null,
         offset: null,
+      },
+    })),
+
+  startResize: (handle, point, shape) =>
+    set((state) => ({
+      ...state,
+      resize: {
+        isResizing: true,
+        handle,
+        startPoint: point,
+        initialShape: shape,
+      },
+    })),
+
+  updateResize: (point) =>
+    set((state) => {
+      if (
+        !state.resize.isResizing ||
+        !state.resize.startPoint ||
+        !state.resize.initialShape ||
+        !state.selectedShapeId
+      ) {
+        return state;
+      }
+
+      const dx = point.x - state.resize.startPoint.x;
+      const dy = point.y - state.resize.startPoint.y;
+      const initialShape = state.resize.initialShape;
+
+      return {
+        ...state,
+        shapes: state.shapes.map((shape) => {
+          if (shape.id !== state.selectedShapeId) return shape;
+
+          if (shape.type === "rectangle" && initialShape.type === "rectangle") {
+            const width = Math.max(10, initialShape.width + dx);
+            const height = Math.max(10, initialShape.height + dy);
+            return { ...shape, width, height };
+          }
+
+          if (shape.type === "circle" && initialShape.type === "circle") {
+            const radius = Math.max(10, initialShape.radius + Math.max(dx, dy));
+            return { ...shape, radius };
+          }
+
+          if (shape.type === "polygon" && initialShape.type === "polygon") {
+            const radius = Math.max(10, initialShape.radius + Math.max(dx, dy));
+            return { ...shape, radius };
+          }
+
+          return shape;
+        }),
+      };
+    }),
+
+  endResize: () =>
+    set((state) => ({
+      ...state,
+      resize: {
+        isResizing: false,
+        handle: null,
+        startPoint: null,
+        initialShape: null,
       },
     })),
 }));

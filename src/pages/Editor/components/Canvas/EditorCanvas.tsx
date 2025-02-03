@@ -37,6 +37,7 @@ export const EditorCanvas = ({
     selectedShapeId,
     mouse,
     drag,
+    resize,
     startDrawing,
     updateDrawing,
     endDrawing,
@@ -45,6 +46,9 @@ export const EditorCanvas = ({
     startDragging,
     updateDragging,
     endDragging,
+    startResize,
+    updateResize,
+    endResize,
   } = useEditorStore();
 
   const getCanvasPoint = useCallback((e: React.MouseEvent): Point => {
@@ -92,8 +96,13 @@ export const EditorCanvas = ({
       const point = getCanvasPoint(e);
 
       if (selectedTool === "cursor") {
+        if (resize.isResizing) {
+          updateResize(point);
+          return;
+        }
         if (drag.isDragging) {
           updateDragging(point);
+          return;
         }
         return;
       }
@@ -105,13 +114,19 @@ export const EditorCanvas = ({
       selectedTool,
       mouse.isDrawing,
       drag.isDragging,
+      resize.isResizing,
       updateDrawing,
       updateDragging,
+      updateResize,
       getCanvasPoint,
     ]
   );
 
   const handleMouseUp = useCallback(() => {
+    if (resize.isResizing) {
+      endResize();
+      return;
+    }
     if (drag.isDragging) {
       endDragging();
       return;
@@ -177,7 +192,27 @@ export const EditorCanvas = ({
 
     addShape(shape);
     endDrawing();
-  }, [drag.isDragging, endDragging, mouse, selectedTool, addShape, endDrawing]);
+  }, [
+    resize.isResizing,
+    drag.isDragging,
+    endResize,
+    endDragging,
+    mouse,
+    selectedTool,
+    addShape,
+    endDrawing,
+  ]);
+
+  const handleStartResize = useCallback(
+    (handle: string, point: Point) => {
+      const selectedShape = shapes.find(
+        (shape) => shape.id === selectedShapeId
+      );
+      if (!selectedShape) return;
+      startResize(handle, point, selectedShape);
+    },
+    [shapes, selectedShapeId, startResize]
+  );
 
   const renderShape = (shape: Shape) => {
     const Component = ShapeComponents[shape.type];
@@ -207,6 +242,7 @@ export const EditorCanvas = ({
         {selectedShapeId && (
           <Selection
             shape={shapes.find((shape) => shape.id === selectedShapeId)!}
+            onStartResize={handleStartResize}
           />
         )}
       </svg>
