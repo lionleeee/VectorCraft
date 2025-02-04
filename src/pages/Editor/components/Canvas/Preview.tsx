@@ -34,38 +34,27 @@ export const Preview = ({ renderShape }: PreviewProps) => {
     rotation: 0,
   };
 
-  let previewShape: Shape;
-
-  switch (selectedTool) {
-    case "rectangle":
-      previewShape = {
+  const previewShape =
+    {
+      rectangle: {
         ...baseShape,
-        type: "rectangle",
+        type: "rectangle" as const,
         borderRadius: 0,
         ...dimensions,
-      } as RectangleShape;
-      break;
-
-    case "circle":
-      previewShape = {
+      } as RectangleShape,
+      circle: {
         ...baseShape,
-        type: "circle",
+        type: "circle" as const,
         ...dimensions,
-      } as CircleShape;
-      break;
-
-    case "polygon":
-      previewShape = {
+      } as CircleShape,
+      polygon: {
         ...baseShape,
-        type: "polygon",
+        type: "polygon" as const,
         sides: 3,
         ...dimensions,
-      } as PolygonShape;
-      break;
+      } as PolygonShape,
+    }[selectedTool] ?? null;
 
-    default:
-      return null;
-  }
-
+  if (!previewShape) return null;
   return renderShape(previewShape);
 };

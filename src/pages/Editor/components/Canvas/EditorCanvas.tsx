@@ -145,40 +145,28 @@ export const EditorCanvas = ({
       rotation: 0,
     };
 
-    let shape: Shape | null = null;
-
-    switch (selectedTool) {
-      case "rectangle":
-        shape = {
+    const shape = () =>
+      ({
+        rectangle: {
           ...baseShape,
-          type: "rectangle",
+          type: "rectangle" as const,
           borderRadius: 0,
           ...dimensions,
-        } as RectangleShape;
-        break;
-
-      case "circle":
-        shape = {
+        } as RectangleShape,
+        circle: {
           ...baseShape,
-          type: "circle",
+          type: "circle" as const,
           ...dimensions,
-        } as CircleShape;
-        break;
-
-      case "polygon":
-        shape = {
+        } as CircleShape,
+        polygon: {
           ...baseShape,
-          type: "polygon",
+          type: "polygon" as const,
           sides: 3,
           ...dimensions,
-        } as PolygonShape;
-        break;
+        } as PolygonShape,
+      }[selectedTool] ?? null);
 
-      default:
-        break;
-    }
-
-    if (shape) addShape(shape);
+    if (!shape) addShape(shape);
     endDrawing();
   }, [
     resize.isResizing,
