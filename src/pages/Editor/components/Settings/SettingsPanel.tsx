@@ -1,6 +1,5 @@
 import { SettingsPanelProps } from "@/types/components/settings";
 import { ColorInput } from "@/components/common/Input/ColorInput";
-import { TextProperties } from "@/pages/Editor/components/Settings/Properties/TextProperties";
 import { CircleProperties } from "@/pages/Editor/components/Settings/Properties/CircleProperties";
 import { RectangleProperties } from "@/pages/Editor/components/Settings/Properties/RectangleProperties";
 import { CursorProperties } from "@/pages/Editor/components/Settings/Properties/CursorProperties";
@@ -21,8 +20,6 @@ export const SettingsPanel = ({
         return <CircleProperties />;
       case "polygon":
         return <PolygonProperties />;
-      case "text":
-        return <TextProperties />;
       default:
         return null;
     }
