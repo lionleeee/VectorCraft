@@ -1,4 +1,6 @@
-export type ToolType = "cursor" | "rectangle" | "circle" | "polygon" | "text";
+import { ShapeType } from "../shape";
+
+export type ToolType = ShapeType | "cursor";
 
 interface BaseToolSettings {
   fill: string;
