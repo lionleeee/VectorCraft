@@ -27,8 +27,4 @@ export interface TextSettings extends BaseToolSettings {
   fontFamily: string;
 }
 
-export type ToolSettings =
-  | RectangleSettings
-  | CircleSettings
-  | PolygonSettings
-  | TextSettings;
+export type ToolSettings = RectangleSettings | CircleSettings | PolygonSettings;
