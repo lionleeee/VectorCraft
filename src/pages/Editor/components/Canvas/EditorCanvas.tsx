@@ -145,8 +145,8 @@ export const EditorCanvas = ({
       rotation: 0,
     };
 
-    const shape = () =>
-      ({
+    const newShape =
+      {
         rectangle: {
           ...baseShape,
           type: "rectangle" as const,
@@ -164,9 +164,9 @@ export const EditorCanvas = ({
           sides: 3,
           ...dimensions,
         } as PolygonShape,
-      }[selectedTool] ?? null);
+      }[selectedTool] ?? null;
 
-    if (!shape) addShape(shape);
+    if (newShape) addShape(newShape);
     endDrawing();
   }, [
     resize.isResizing,
