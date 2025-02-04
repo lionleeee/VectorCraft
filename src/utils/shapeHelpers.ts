@@ -1,5 +1,9 @@
+import { Circle } from "@/pages/Editor/components/Canvas/shapes/Circle";
+import { Polygon } from "@/pages/Editor/components/Canvas/shapes/Polygon";
+import { Rectangle } from "@/pages/Editor/components/Canvas/shapes/Rectangle";
 import { Point } from "@/types/mouse";
 import { Shape } from "@/types/shape";
+import { ComponentType } from "react";
 
 export const calculatePolygonPoints = (
   centerX: number,
@@ -41,4 +45,13 @@ export const isPointInShape = (point: Point, shape: Shape): boolean => {
       return dx * dx + dy * dy <= shape.radius * shape.radius;
     }
   }
+};
+
+export const shapeComponentsMapper: Record<
+  Shape["type"],
+  ComponentType<{ shape: Shape }>
+> = {
+  rectangle: Rectangle as ComponentType<{ shape: Shape }>,
+  circle: Circle as ComponentType<{ shape: Shape }>,
+  polygon: Polygon as ComponentType<{ shape: Shape }>,
 };

@@ -9,22 +9,11 @@ import {
   RectangleShape,
   Shape,
 } from "@/types/shape";
-import { Circle } from "./shapes/Circle";
-import { Polygon } from "./shapes/Polygon";
-import { Rectangle } from "./shapes/Rectangle";
+
 import { calculateShapeDimensions } from "@/utils/shapeCalculator";
 import { Preview } from "./Preview";
 import { Selection } from "./Selection";
-import { isPointInShape } from "@/utils/shapeHelpers";
-
-const ShapeComponents: Record<
-  Shape["type"],
-  React.ComponentType<{ shape: Shape }>
-> = {
-  rectangle: Rectangle as React.ComponentType<{ shape: Shape }>,
-  circle: Circle as React.ComponentType<{ shape: Shape }>,
-  polygon: Polygon as React.ComponentType<{ shape: Shape }>,
-};
+import { isPointInShape, shapeComponentsMapper } from "@/utils/shapeHelpers";
 
 export const EditorCanvas = ({
   width,
@@ -214,7 +203,7 @@ export const EditorCanvas = ({
   );
 
   const renderShape = (shape: Shape) => {
-    const Component = ShapeComponents[shape.type];
+    const Component = shapeComponentsMapper[shape.type];
     return <Component key={shape.id} shape={shape} />;
   };
 
