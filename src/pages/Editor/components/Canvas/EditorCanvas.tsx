@@ -156,7 +156,7 @@ export const EditorCanvas = ({
       rotation: 0,
     };
 
-    let shape: Shape;
+    let shape: Shape | null = null;
 
     switch (selectedTool) {
       case "rectangle":
@@ -186,11 +186,10 @@ export const EditorCanvas = ({
         break;
 
       default:
-        endDrawing();
-        return;
+        break;
     }
 
-    addShape(shape);
+    if (shape) addShape(shape);
     endDrawing();
   }, [
     resize.isResizing,
