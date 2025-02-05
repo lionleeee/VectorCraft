@@ -18,6 +18,7 @@ export interface CircleSettings extends BaseToolSettings {
 }
 
 export interface PolygonSettings extends BaseToolSettings {
+  radius: number;
   sides: number;
 }
 
@@ -27,4 +28,8 @@ export interface TextSettings extends BaseToolSettings {
   fontFamily: string;
 }
 
-export type ToolSettings = RectangleSettings | CircleSettings | PolygonSettings;
+export interface ToolSettings {
+  rectangle: RectangleSettings;
+  circle: CircleSettings;
+  polygon: PolygonSettings;
+}

@@ -27,6 +27,7 @@ export const EditorCanvas = ({
     mouse,
     drag,
     resize,
+    toolSettings,
     startDrawing,
     updateDrawing,
     endDrawing,
@@ -137,31 +138,24 @@ export const EditorCanvas = ({
       type: selectedTool,
     });
 
-    const baseShape = {
-      type: selectedTool,
-      fill: "#000",
-      stroke: "#000000",
-      strokeWidth: 1,
-      rotation: 0,
-    };
+    const baseToolSettings = toolSettings[selectedTool];
 
     const newShape =
       {
         rectangle: {
-          ...baseShape,
+          ...baseToolSettings,
           type: "rectangle" as const,
           borderRadius: 0,
           ...dimensions,
         } as RectangleShape,
         circle: {
-          ...baseShape,
+          ...baseToolSettings,
           type: "circle" as const,
           ...dimensions,
         } as CircleShape,
         polygon: {
-          ...baseShape,
+          ...baseToolSettings,
           type: "polygon" as const,
-          sides: 3,
           ...dimensions,
         } as PolygonShape,
       }[selectedTool] ?? null;
@@ -175,6 +169,7 @@ export const EditorCanvas = ({
     endDragging,
     mouse,
     selectedTool,
+    toolSettings,
     addShape,
     endDrawing,
   ]);
