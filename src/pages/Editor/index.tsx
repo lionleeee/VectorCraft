@@ -1,6 +1,5 @@
-import { useState } from "react";
+import { useRef, useState } from "react";
 import { BaseLayout } from "@/components/Layout/BaseLayout";
-import { Header } from "@/components/Layout/Header";
 import { SettingsPanel } from "@/pages/Editor/components/Settings/SettingsPanel";
 import { ToolPanel } from "@/pages/Editor/components/Tools/ToolPanel";
 import { LayerPanel } from "@/pages/Editor/components/Layers/LayerPanel";
@@ -9,6 +8,7 @@ import { Content } from "@/components/Layout/Content";
 import { PanelContainer } from "@/components/Layout/PanelContainer";
 import { CreateCanvasModal } from "@/pages/Editor/components/Modals/CanvasModal";
 import { EditorCanvas } from "./components/Canvas/EditorCanvas";
+import { Header } from "./components/Layout/Header";
 
 export const EditorPage = () => {
   const [showCanvasModal, setShowCanvasModal] = useState(true);
@@ -17,6 +17,7 @@ export const EditorPage = () => {
     height?: number;
     backgroundColor?: string;
   }>();
+  const canvasRef = useRef<HTMLDivElement>(null);
 
   const handleCreateCanvas = (
     width: number,
@@ -39,13 +40,13 @@ export const EditorPage = () => {
 
   return (
     <BaseLayout>
-      <Header onReset={handleResetCanvas} />
+      <Header onReset={handleResetCanvas} canvasRef={canvasRef} />
       <Container>
         <PanelContainer position="left" width={48}>
           <ToolPanel />
         </PanelContainer>
         <Content>
-          <EditorCanvas {...canvasProps} />
+          <EditorCanvas {...canvasProps} ref={canvasRef} />
         </Content>
         <PanelContainer position="right" width={256} className="p-4">
           <SettingsPanel
