@@ -7,9 +7,10 @@ import { ColorInput } from "@/components/common/Input/ColorInput";
 import { useEditorStore } from "@/store/useEditorStore";
 import { ToolType } from "@/types/components/tools";
 import { ComponentType, useMemo } from "react";
+import { CursorProperties } from "./Properties/CursorProperties";
 
 const ToolComponents: Record<ToolType, ComponentType> = {
-  //cursor: CursorProperties,
+  cursor: CursorProperties,
   rectangle: RectangleProperties,
   circle: CircleProperties,
   polygon: PolygonProperties,
