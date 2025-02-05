@@ -1,8 +1,16 @@
 import { Button } from "@/components/common/Button/Button";
+import { useEditorStore } from "@/store/useEditorStore";
 import { HeaderProps } from "@/types/components/header";
 import { exportToPng } from "@/utils/exportCanvas";
+import { exportSettings } from "@/utils/fileManager";
 
 export const Header = ({ onReset, canvasRef }: HeaderProps) => {
+  const { shapes } = useEditorStore();
+
+  const handleExportSettings = () => {
+    exportSettings(shapes);
+  };
+
   const handleExportPng = () => {
     if (canvasRef.current) {
       exportToPng(canvasRef.current);
@@ -18,7 +26,7 @@ export const Header = ({ onReset, canvasRef }: HeaderProps) => {
         </div>
 
         <div className="flex gap-4 text-sm">
-          <Button>설정 내보내기</Button>
+          <Button onClick={handleExportSettings}>설정 내보내기</Button>
           <Button>설정 불러오기</Button>
           <Button onClick={handleExportPng}>PNG다운로드</Button>
         </div>
