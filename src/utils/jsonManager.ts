@@ -13,4 +13,17 @@ export const exportSettings = (shapes: Shape[]) => {
   link.href = url;
   link.download = "vectorcraft-settings.json";
   link.click();
+
+  URL.revokeObjectURL(url);
+};
+
+export const importSettings = async (file: File): Promise<Shape[]> => {
+  const text = await file.text();
+  const settings = JSON.parse(text);
+
+  if (!settings.shapes || !Array.isArray(settings.shapes)) {
+    throw new Error("유효하지 않은 설정 파일입니다.");
+  }
+
+  return settings.shapes;
 };

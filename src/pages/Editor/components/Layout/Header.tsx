@@ -2,13 +2,29 @@ import { Button } from "@/components/common/Button/Button";
 import { useEditorStore } from "@/store/useEditorStore";
 import { HeaderProps } from "@/types/components/header";
 import { exportToPng } from "@/utils/exportCanvas";
-import { exportSettings } from "@/utils/fileManager";
+import { exportSettings, importSettings } from "@/utils/jsonManager";
+import { useRef } from "react";
 
 export const Header = ({ onReset, canvasRef }: HeaderProps) => {
   const { shapes } = useEditorStore();
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   const handleExportSettings = () => {
     exportSettings(shapes);
+  };
+
+  const handleImportSettings = async (
+    e: React.ChangeEvent<HTMLInputElement>
+  ) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    const importedShapes = await importSettings(file);
+    useEditorStore.setState({ shapes: importedShapes });
+  };
+
+  const handleImportClick = () => {
+    fileInputRef.current?.click();
   };
 
   const handleExportPng = () => {
@@ -27,8 +43,16 @@ export const Header = ({ onReset, canvasRef }: HeaderProps) => {
 
         <div className="flex gap-4 text-sm">
           <Button onClick={handleExportSettings}>설정 내보내기</Button>
-          <Button>설정 불러오기</Button>
+
+          <Button onClick={handleImportClick}>설정 불러오기</Button>
           <Button onClick={handleExportPng}>PNG다운로드</Button>
+          <input
+            type="file"
+            ref={fileInputRef}
+            onChange={handleImportSettings}
+            accept=".json"
+            className="hidden"
+          />
         </div>
       </div>
     </header>
