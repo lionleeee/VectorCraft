@@ -1,6 +1,5 @@
-import { useState } from "react";
+import { useRef, useState } from "react";
 import { BaseLayout } from "@/components/Layout/BaseLayout";
-import { Header } from "@/components/Layout/Header";
 import { SettingsPanel } from "@/pages/Editor/components/Settings/SettingsPanel";
 import { ToolPanel } from "@/pages/Editor/components/Tools/ToolPanel";
 import { LayerPanel } from "@/pages/Editor/components/Layers/LayerPanel";
@@ -8,8 +7,8 @@ import { Container } from "@/components/Layout/Container";
 import { Content } from "@/components/Layout/Content";
 import { PanelContainer } from "@/components/Layout/PanelContainer";
 import { CreateCanvasModal } from "@/pages/Editor/components/Modals/CanvasModal";
-import { ToolType } from "@/types/components/tools";
 import { EditorCanvas } from "./components/Canvas/EditorCanvas";
+import { Header } from "./components/Layout/Header";
 
 export const EditorPage = () => {
   const [showCanvasModal, setShowCanvasModal] = useState(true);
@@ -18,10 +17,7 @@ export const EditorPage = () => {
     height?: number;
     backgroundColor?: string;
   }>();
-  const [selectedTool, setSelectedTool] = useState<ToolType>("cursor");
-  const handleSelectTool = (tool: ToolType) => {
-    setSelectedTool(tool);
-  };
+  const canvasRef = useRef<HTMLDivElement>(null);
 
   const handleCreateCanvas = (
     width: number,
@@ -44,20 +40,16 @@ export const EditorPage = () => {
 
   return (
     <BaseLayout>
-      <Header onReset={handleResetCanvas} />
+      <Header onReset={handleResetCanvas} canvasRef={canvasRef} />
       <Container>
         <PanelContainer position="left" width={48}>
-          <ToolPanel
-            selectedTool={selectedTool}
-            onSelectTool={handleSelectTool}
-          />
+          <ToolPanel />
         </PanelContainer>
         <Content>
-          <EditorCanvas {...canvasProps} />
+          <EditorCanvas {...canvasProps} ref={canvasRef} />
         </Content>
         <PanelContainer position="right" width={256} className="p-4">
           <SettingsPanel
-            selectedTool={selectedTool}
             backgroundColor={canvasProps?.backgroundColor || "#FFFFFF"}
             onChangeBackgroundColor={handleChangeBackgroundColor}
           />

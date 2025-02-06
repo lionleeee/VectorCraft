@@ -12,7 +12,7 @@ interface PreviewProps {
 }
 
 export const Preview = ({ renderShape }: PreviewProps) => {
-  const { mouse, selectedTool } = useEditorStore();
+  const { mouse, selectedTool, toolSettings } = useEditorStore();
   const { isDrawing, startPoint, endPoint } = mouse;
 
   if (!isDrawing || !startPoint || !endPoint || selectedTool === "cursor") {
@@ -25,32 +25,24 @@ export const Preview = ({ renderShape }: PreviewProps) => {
     type: selectedTool,
   });
 
-  const baseShape = {
-    id: "preview",
-    type: selectedTool,
-    fill: "none",
-    stroke: "#000000",
-    strokeWidth: 1,
-    rotation: 0,
-  };
+  const baseToolSettings = toolSettings[selectedTool];
 
   const previewShape =
     {
       rectangle: {
-        ...baseShape,
+        ...baseToolSettings,
         type: "rectangle" as const,
         borderRadius: 0,
         ...dimensions,
       } as RectangleShape,
       circle: {
-        ...baseShape,
+        ...baseToolSettings,
         type: "circle" as const,
         ...dimensions,
       } as CircleShape,
       polygon: {
-        ...baseShape,
+        ...baseToolSettings,
         type: "polygon" as const,
-        sides: 3,
         ...dimensions,
       } as PolygonShape,
     }[selectedTool] ?? null;

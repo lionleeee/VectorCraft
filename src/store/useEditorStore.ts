@@ -2,7 +2,13 @@ import { create } from "zustand";
 import { Shape } from "@/types/shape";
 
 import { MouseState, Point } from "@/types/mouse";
-import { ToolType } from "@/types/components/tools";
+import {
+  CircleSettings,
+  PolygonSettings,
+  RectangleSettings,
+  ToolSettings,
+  ToolType,
+} from "@/types/components/tools";
 import { nanoid } from "nanoid";
 
 interface DragState {
@@ -26,7 +32,11 @@ interface EditorState {
   mouse: MouseState;
   drag: DragState;
   resize: ResizeState;
-
+  toolSettings: ToolSettings;
+  updateToolSettings: <T extends keyof ToolSettings>(
+    tool: T,
+    settings: Partial<ToolSettings[T]>
+  ) => void;
   addShape: (shape: Shape) => void;
   updateShape: <T extends Shape>(
     id: string,
@@ -68,7 +78,39 @@ export const useEditorStore = create<EditorState>((set) => ({
     startPoint: null,
     initialShape: null,
   },
-
+  toolSettings: {
+    rectangle: {
+      width: 100,
+      height: 100,
+      fill: "#000000",
+      stroke: "#000000",
+      strokeWidth: 1,
+      borderRadius: 0,
+    } as RectangleSettings,
+    circle: {
+      radius: 50,
+      fill: "#000000",
+      stroke: "#000000",
+      strokeWidth: 1,
+    } as CircleSettings,
+    polygon: {
+      radius: 50,
+      sides: 3,
+      fill: "#000000",
+      stroke: "#000000",
+      strokeWidth: 1,
+    } as PolygonSettings,
+  },
+  updateToolSettings: (tool, settings) =>
+    set((state) => ({
+      toolSettings: {
+        ...state.toolSettings,
+        [tool]: {
+          ...state.toolSettings[tool],
+          ...settings,
+        },
+      },
+    })),
   addShape: (shape) =>
     set((state) => ({
       ...state,
