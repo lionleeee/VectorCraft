@@ -9,23 +9,30 @@ import { PanelContainer } from "@/components/Layout/PanelContainer";
 import { CreateCanvasModal } from "@/pages/Editor/components/Modals/CanvasModal";
 import { EditorCanvas } from "./components/Canvas/EditorCanvas";
 import { Header } from "./components/Layout/Header";
+import { useParams, useNavigate } from "react-router-dom";
+import { nanoid } from "nanoid";
+import { useEditorStore } from "@/store/useEditorStore";
 
 export const EditorPage = () => {
-  const [showCanvasModal, setShowCanvasModal] = useState(true);
+  const { canvasId } = useParams();
+  const [showCanvasModal, setShowCanvasModal] = useState(!canvasId);
   const [canvasProps, setCanvasProps] = useState<{
     width?: number;
     height?: number;
     backgroundColor?: string;
   }>();
   const canvasRef = useRef<HTMLDivElement>(null);
+  const navigate = useNavigate();
 
   const handleCreateCanvas = (
     width: number,
     height: number,
     backgroundColor: string
   ) => {
+    const newCanvasId = nanoid(10);
     setCanvasProps({ width, height, backgroundColor });
     setShowCanvasModal(false);
+    navigate(`/editor/${newCanvasId}`);
   };
 
   const handleChangeBackgroundColor = (color: string) => {
@@ -35,7 +42,9 @@ export const EditorPage = () => {
   };
 
   const handleResetCanvas = () => {
+    useEditorStore.getState().reset();
     setShowCanvasModal(true);
+    setCanvasProps(undefined);
   };
 
   return (
