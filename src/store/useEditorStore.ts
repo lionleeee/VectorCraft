@@ -1,5 +1,7 @@
 import { create } from "zustand";
 import { Shape } from "@/types/shape";
+import { supabase } from "@/lib/supabase";
+import { Canvas, ShapeRecord } from "@/types/supabase";
 
 import { MouseState, Point } from "@/types/mouse";
 import {
@@ -55,9 +57,13 @@ interface EditorState {
   startResize: (handle: string, point: Point, shape: Shape) => void;
   updateResize: (point: Point) => void;
   endResize: () => void;
+  canvasId: string | null;
+  initializeCanvas: (canvas: Canvas) => void;
+  subscribeToChanges: () => void;
+  unsubscribeFromChanges: () => void;
 }
 
-export const useEditorStore = create<EditorState>((set) => ({
+export const useEditorStore = create<EditorState>((set, get) => ({
   shapes: [],
   selectedShapeId: null,
   selectedTool: "cursor",
@@ -111,12 +117,15 @@ export const useEditorStore = create<EditorState>((set) => ({
         },
       },
     })),
-  addShape: (shape) =>
-    set((state) => ({
-      ...state,
-      shapes: [...state.shapes, { ...shape, id: nanoid() }],
-    })),
+  addShape: async (shape: Shape) => {
+    const { canvasId } = get();
+    if (!canvasId) return;
 
+    await supabase.from("shapes").insert({
+      canvas_id: canvasId,
+      shape_data: shape,
+    });
+  },
   updateShape: (id, updates) =>
     set((state) => ({
       ...state,
@@ -129,30 +138,29 @@ export const useEditorStore = create<EditorState>((set) => ({
           : shape
       ),
     })),
+  deleteShape: async (id: string) => {
+    const { canvasId } = get();
+    if (!canvasId) return;
 
-  deleteShape: (id) =>
-    set((state) => ({
-      shapes: state.shapes.filter((shape) => shape.id !== id),
-      selectedShapeId:
-        state.selectedShapeId === id ? null : state.selectedShapeId,
-    })),
-
+    await supabase
+      .from("shapes")
+      .update({ deleted_at: new Date().toISOString() })
+      .eq("canvas_id", canvasId)
+      .eq("shape_data->>id", id);
+  },
   selectShape: (id) =>
     set({
       selectedShapeId: id,
     }),
-
   setSelectedTool: (tool) =>
     set((state) => ({
       ...state,
       selectedTool: tool,
     })),
-
   setIsDragging: (isDragging) =>
     set({
       isDragging,
     }),
-
   startDrawing: (point) =>
     set((state) => ({
       ...state,
@@ -162,7 +170,6 @@ export const useEditorStore = create<EditorState>((set) => ({
         endPoint: point,
       },
     })),
-
   updateDrawing: (point) =>
     set((state) => ({
       ...state,
@@ -171,7 +178,6 @@ export const useEditorStore = create<EditorState>((set) => ({
         endPoint: point,
       },
     })),
-
   endDrawing: () =>
     set((state) => ({
       ...state,
@@ -181,7 +187,6 @@ export const useEditorStore = create<EditorState>((set) => ({
         endPoint: null,
       },
     })),
-
   startDragging: (point, offset) =>
     set((state) => ({
       ...state,
@@ -191,7 +196,6 @@ export const useEditorStore = create<EditorState>((set) => ({
         offset,
       },
     })),
-
   updateDragging: (point) =>
     set((state) => {
       if (
@@ -220,7 +224,6 @@ export const useEditorStore = create<EditorState>((set) => ({
         ),
       };
     }),
-
   endDragging: () =>
     set((state) => ({
       ...state,
@@ -230,7 +233,6 @@ export const useEditorStore = create<EditorState>((set) => ({
         offset: null,
       },
     })),
-
   startResize: (handle, point, shape) =>
     set((state) => ({
       ...state,
@@ -241,7 +243,6 @@ export const useEditorStore = create<EditorState>((set) => ({
         initialShape: shape,
       },
     })),
-
   updateResize: (point) =>
     set((state) => {
       if (
@@ -308,7 +309,6 @@ export const useEditorStore = create<EditorState>((set) => ({
         }),
       };
     }),
-
   endResize: () =>
     set((state) => ({
       ...state,
@@ -319,4 +319,84 @@ export const useEditorStore = create<EditorState>((set) => ({
         initialShape: null,
       },
     })),
+  canvasId: null,
+  initializeCanvas: async (canvas: Canvas) => {
+    set({
+      canvasId: canvas.id,
+      width: canvas.width,
+      height: canvas.height,
+      backgroundColor: canvas.background_color,
+    });
+
+    // 캔버스의 모든 도형들을 불러옵니다
+    const { data: shapes } = await supabase
+      .from("shapes")
+      .select("*")
+      .eq("canvas_id", canvas.id)
+      .is("deleted_at", null)
+      .order("created_at", { ascending: true });
+
+    if (shapes) {
+      set({ shapes: shapes.map((s) => s.shape_data) });
+    }
+  },
+  subscribeToChanges: () => {
+    const { canvasId } = get();
+    if (!canvasId) return;
+
+    // 실시간 구독 설정
+    const subscription = supabase
+      .channel(`canvas:${canvasId}`)
+      .on(
+        "postgres_changes",
+        {
+          event: "*",
+          schema: "public",
+          table: "shapes",
+          filter: `canvas_id=eq.${canvasId}`,
+        },
+        async (payload) => {
+          const { eventType, new: newRecord, old: oldRecord } = payload;
+
+          switch (eventType) {
+            case "INSERT": {
+              const shapeRecord = newRecord as ShapeRecord;
+              set((state) => ({
+                shapes: [...state.shapes, shapeRecord.shape_data],
+              }));
+              break;
+            }
+            case "DELETE":
+            case "UPDATE": {
+              const shapeRecord = oldRecord as ShapeRecord;
+              set((state) => ({
+                shapes: state.shapes.filter(
+                  (s) => s.id !== shapeRecord.shape_data.id
+                ),
+              }));
+              if (eventType === "UPDATE" && newRecord) {
+                set((state) => ({
+                  shapes: [
+                    ...state.shapes,
+                    (newRecord as ShapeRecord).shape_data,
+                  ],
+                }));
+              }
+              break;
+            }
+          }
+        }
+      )
+      .subscribe();
+
+    return () => {
+      subscription.unsubscribe();
+    };
+  },
+  unsubscribeFromChanges: () => {
+    const { canvasId } = get();
+    if (!canvasId) return;
+
+    supabase.channel(`canvas:${canvasId}`).unsubscribe();
+  },
 }));
