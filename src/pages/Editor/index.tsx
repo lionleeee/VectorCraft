@@ -1,4 +1,5 @@
-import { useRef, useState } from "react";
+import { useRef } from "react";
+import { useParams } from "react-router-dom";
 import { BaseLayout } from "@/components/Layout/BaseLayout";
 import { SettingsPanel } from "@/pages/Editor/components/Settings/SettingsPanel";
 import { ToolPanel } from "@/pages/Editor/components/Tools/ToolPanel";
@@ -9,45 +10,24 @@ import { PanelContainer } from "@/components/Layout/PanelContainer";
 import { CreateCanvasModal } from "@/pages/Editor/components/Modals/CanvasModal";
 import { EditorCanvas } from "./components/Canvas/EditorCanvas";
 import { Header } from "./components/Layout/Header";
-import { useParams, useNavigate } from "react-router-dom";
-import { nanoid } from "nanoid";
-import { useEditorStore } from "@/store/useEditorStore";
-import { useRealtimeChannel } from "@/hooks/useRealtimeChannel";
+import { useCanvas } from "@/hooks/useCanvas";
 
 export const EditorPage = () => {
   const { canvasId } = useParams();
-  useRealtimeChannel(canvasId);
-  const [showCanvasModal, setShowCanvasModal] = useState(!canvasId);
-  const [canvasProps, setCanvasProps] = useState<{
-    width?: number;
-    height?: number;
-    backgroundColor?: string;
-  }>();
   const canvasRef = useRef<HTMLDivElement>(null);
-  const navigate = useNavigate();
+  const {
+    isLoading,
+    showCanvasModal,
+    canvasProps,
+    setShowCanvasModal,
+    handleCreateCanvas,
+    handleChangeBackgroundColor,
+    handleResetCanvas,
+  } = useCanvas(canvasId);
 
-  const handleCreateCanvas = (
-    width: number,
-    height: number,
-    backgroundColor: string
-  ) => {
-    const newCanvasId = nanoid(10);
-    setCanvasProps({ width, height, backgroundColor });
-    setShowCanvasModal(false);
-    navigate(`/editor/${newCanvasId}`);
-  };
-
-  const handleChangeBackgroundColor = (color: string) => {
-    setCanvasProps((prev) =>
-      prev ? { ...prev, backgroundColor: color } : prev
-    );
-  };
-
-  const handleResetCanvas = () => {
-    useEditorStore.getState().reset();
-    setShowCanvasModal(true);
-    setCanvasProps(undefined);
-  };
+  if (isLoading && canvasId) {
+    return <div>로딩중...</div>;
+  }
 
   return (
     <BaseLayout>
