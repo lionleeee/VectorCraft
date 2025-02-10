@@ -12,9 +12,11 @@ import { Header } from "./components/Layout/Header";
 import { useParams, useNavigate } from "react-router-dom";
 import { nanoid } from "nanoid";
 import { useEditorStore } from "@/store/useEditorStore";
+import { useRealtimeChannel } from "@/hooks/useRealtimeChannel";
 
 export const EditorPage = () => {
   const { canvasId } = useParams();
+  useRealtimeChannel(canvasId);
   const [showCanvasModal, setShowCanvasModal] = useState(!canvasId);
   const [canvasProps, setCanvasProps] = useState<{
     width?: number;
