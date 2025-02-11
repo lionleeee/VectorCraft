@@ -50,8 +50,7 @@ export const EditorCanvas = forwardRef<HTMLDivElement, CanvasProps>(
     const handleMouseDown = useCallback(
       (e: React.MouseEvent) => {
         const point = getCanvasPoint(e);
-        console.log("point", point);
-        console.log("selectedTool", selectedTool);
+
         if (selectedTool === "cursor") {
           for (let i = shapes.length - 1; i >= 0; i--) {
             if (isPointInShape(point, shapes[i])) {
@@ -63,7 +62,6 @@ export const EditorCanvas = forwardRef<HTMLDivElement, CanvasProps>(
           return;
         }
 
-        console.log("startDrawing", point);
         startDrawing(point);
       },
       [

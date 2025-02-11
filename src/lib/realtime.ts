@@ -39,7 +39,6 @@ class RealtimeManager {
   }
 
   broadcastCanvas(event: CanvasEvent) {
-    console.log("broadcastCanvas", event);
     this.channel?.send({
       type: "broadcast",
       event: "canvas",
