@@ -119,7 +119,12 @@ export const EditorCanvas = forwardRef<HTMLDivElement, CanvasProps>(
           (shape) => shape.id === selectedShapeId
         );
         if (selectedShape) {
-          broadcastShapeUpdate(selectedShape);
+          try {
+            shapeService.updateShape(selectedShape.id, selectedShape);
+            broadcastShapeUpdate(selectedShape);
+          } catch (error) {
+            console.error("도형 업데이트 실패:", error);
+          }
         }
         endResize();
         return;
@@ -130,7 +135,12 @@ export const EditorCanvas = forwardRef<HTMLDivElement, CanvasProps>(
           (shape) => shape.id === selectedShapeId
         );
         if (selectedShape) {
-          broadcastShapeUpdate(selectedShape);
+          try {
+            shapeService.updateShape(selectedShape.id, selectedShape);
+            broadcastShapeUpdate(selectedShape);
+          } catch (error) {
+            console.error("도형 업데이트 실패:", error);
+          }
         }
         endDragging();
         return;

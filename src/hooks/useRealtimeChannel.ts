@@ -28,6 +28,7 @@ export const useRealtimeChannel = (canvasId: string | undefined) => {
                 break;
               case "update":
                 if (payload.shape) {
+                  console.log("payload.shape", payload.shape);
                   updateShape(payload.shape.id, payload.shape);
                 }
                 break;
