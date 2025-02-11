@@ -1,10 +1,10 @@
 import { IconButton } from "@/components/common/Button/IconButton";
 import { ICONS } from "@/constants/icons";
-import { useEditorStore } from "@/store/useEditorStore";
+
+import { useShapeStore } from "@/store/useShapeStore";
 
 export const LayerPanel = () => {
-  const { shapes, deleteShape, selectShape, selectedShapeId } =
-    useEditorStore();
+  const { shapes, deleteShape, selectShape, selectedShapeId } = useShapeStore();
 
   return (
     <>
