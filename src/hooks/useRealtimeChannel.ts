@@ -1,11 +1,13 @@
 import { useEffect } from "react";
-import { useEditorStore } from "@/store/useEditorStore";
+import { useShapeStore } from "@/store/useShapeStore";
+import { useCanvasStore } from "@/store/useCanvasStore";
 import { realtimeManager } from "@/lib/realtime";
 import { Shape } from "@/types/shape";
 
 export const useRealtimeChannel = (canvasId: string | undefined) => {
-  const { addShape, updateShape, deleteShape, setBackgroundColor } =
-    useEditorStore();
+  const { addShape, updateShape, deleteShape } = useShapeStore();
+
+  const { setBackgroundColor } = useCanvasStore();
 
   useEffect(() => {
     if (!canvasId) return;

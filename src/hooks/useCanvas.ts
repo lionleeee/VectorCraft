@@ -2,16 +2,17 @@ import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { supabase } from "@/lib/supabase";
 import { nanoid } from "nanoid";
-import { useEditorStore } from "@/store/useEditorStore";
+import { useCanvasStore } from "@/store/useCanvasStore";
+import { useShapeStore } from "@/store/useShapeStore";
 import { realtimeManager } from "@/lib/realtime";
 
 export const useCanvas = (canvasId: string | undefined) => {
   const [isLoading, setIsLoading] = useState(true);
   const [showCanvasModal, setShowCanvasModal] = useState(!canvasId);
-  const [width, setWidth] = useState<number>();
-  const [height, setHeight] = useState<number>();
   const navigate = useNavigate();
-  const { setBackgroundColor } = useEditorStore();
+
+  const { setBackgroundColor, setDimensions } = useCanvasStore();
+  const { reset: resetShapes } = useShapeStore();
 
   useEffect(() => {
     const loadCanvas = async () => {
@@ -29,8 +30,7 @@ export const useCanvas = (canvasId: string | undefined) => {
           return;
         }
 
-        setWidth(canvas.width);
-        setHeight(canvas.height);
+        setDimensions(canvas.width, canvas.height);
         setBackgroundColor(canvas.background_color);
       } finally {
         setIsLoading(false);
@@ -38,7 +38,7 @@ export const useCanvas = (canvasId: string | undefined) => {
     };
 
     loadCanvas();
-  }, [canvasId, navigate, setBackgroundColor]);
+  }, [canvasId, navigate, setBackgroundColor, setDimensions]);
 
   //캔버스 생성
   const handleCreateCanvas = async (
@@ -58,8 +58,7 @@ export const useCanvas = (canvasId: string | undefined) => {
       background_color: backgroundColor,
     });
 
-    setWidth(width);
-    setHeight(height);
+    setDimensions(width, height);
     setBackgroundColor(backgroundColor);
   };
 
@@ -82,17 +81,15 @@ export const useCanvas = (canvasId: string | undefined) => {
 
   //캔버스 리셋
   const handleResetCanvas = () => {
-    useEditorStore.getState().reset();
+    resetShapes();
     setShowCanvasModal(true);
-    setWidth(undefined);
-    setHeight(undefined);
+    setDimensions(0, 0);
+    setBackgroundColor("#FFFFFF");
   };
 
   return {
     isLoading,
     showCanvasModal,
-    width,
-    height,
     setShowCanvasModal,
     handleCreateCanvas,
     handleChangeBackgroundColor,

@@ -1,6 +1,7 @@
-import { forwardRef, useCallback, useEffect } from "react";
+import { forwardRef, useCallback } from "react";
 import { CanvasProps } from "@/types/components/canvas";
-import { useEditorStore } from "@/store/useEditorStore";
+import { useShapeStore } from "@/store/useShapeStore";
+import { useToolStore } from "@/store/useToolStore";
 import { Point } from "@/types/mouse";
 
 import {
@@ -19,12 +20,10 @@ export const EditorCanvas = forwardRef<HTMLDivElement, CanvasProps>(
   ({ width, height, backgroundColor }, ref) => {
     const {
       shapes,
-      selectedTool,
       selectedShapeId,
       mouse,
       drag,
       resize,
-      toolSettings,
       startDrawing,
       updateDrawing,
       endDrawing,
@@ -36,10 +35,9 @@ export const EditorCanvas = forwardRef<HTMLDivElement, CanvasProps>(
       startResize,
       updateResize,
       endResize,
-    } = useEditorStore();
-    useEffect(() => {
-      console.log("backgroundColor", backgroundColor);
-    }, [backgroundColor]);
+    } = useShapeStore();
+
+    const { selectedTool, toolSettings } = useToolStore();
 
     const getCanvasPoint = useCallback((e: React.MouseEvent): Point => {
       const rect = e.currentTarget.getBoundingClientRect();
@@ -51,24 +49,21 @@ export const EditorCanvas = forwardRef<HTMLDivElement, CanvasProps>(
 
     const handleMouseDown = useCallback(
       (e: React.MouseEvent) => {
-        //1. 마우스 클릭 좌표 확인
         const point = getCanvasPoint(e);
+        console.log("point", point);
+        console.log("selectedTool", selectedTool);
         if (selectedTool === "cursor") {
-          //2. 도형 확인
           for (let i = shapes.length - 1; i >= 0; i--) {
             if (isPointInShape(point, shapes[i])) {
-              //3-1. 도형 찾을 경우
               selectShape(shapes[i].id);
-              // 드래그 시작
               startDragging(point, { x: shapes[i].x, y: shapes[i].y });
               return;
             }
           }
-          //3-2. 도형 못 찾을 경우
-          selectShape(null);
           return;
         }
 
+        console.log("startDrawing", point);
         startDrawing(point);
       },
       [

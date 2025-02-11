@@ -12,19 +12,17 @@ import { EditorCanvas } from "./components/Canvas/EditorCanvas";
 import { Header } from "./components/Layout/Header";
 import { useCanvas } from "@/hooks/useCanvas";
 import { useRealtimeChannel } from "@/hooks/useRealtimeChannel";
-import { useEditorStore } from "@/store/useEditorStore";
+import { useCanvasStore } from "@/store/useCanvasStore";
 
 export const EditorPage = () => {
   const { canvasId } = useParams();
   const canvasRef = useRef<HTMLDivElement>(null);
   useRealtimeChannel(canvasId);
 
-  const backgroundColor = useEditorStore((state) => state.backgroundColor);
+  const { width, height, backgroundColor } = useCanvasStore();
   const {
     isLoading,
     showCanvasModal,
-    width,
-    height,
     setShowCanvasModal,
     handleCreateCanvas,
     handleChangeBackgroundColor,
