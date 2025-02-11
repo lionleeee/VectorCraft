@@ -15,8 +15,8 @@ export const useRealtimeChannel = (canvasId: string | undefined) => {
       try {
         const { channel, shapes } = await realtimeManager.initialize(canvasId);
 
-        // 초기 도형 데이터 설정
         shapes.forEach(addShape);
+        console.log("shapes", shapes);
 
         channel
           .on("broadcast", { event: "shape" }, ({ payload }) => {

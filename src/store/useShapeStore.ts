@@ -43,6 +43,7 @@ interface ShapeState {
 }
 
 export const useShapeStore = create<ShapeState>((set) => ({
+  // ... 기존 shape 관련 코드를 여기로 이동
   shapes: [],
   selectedShapeId: null,
   mouse: {

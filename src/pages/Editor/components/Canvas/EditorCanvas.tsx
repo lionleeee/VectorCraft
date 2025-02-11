@@ -4,6 +4,7 @@ import { useShapeStore } from "@/store/useShapeStore";
 import { useToolStore } from "@/store/useToolStore";
 import { Point } from "@/types/mouse";
 import { useParams } from "react-router-dom";
+import { useRealtimeChannel } from "@/hooks/useRealtimeChannel";
 
 import {
   CircleShape,
@@ -41,6 +42,8 @@ export const EditorCanvas = forwardRef<HTMLDivElement, CanvasProps>(
 
     const { selectedTool, toolSettings } = useToolStore();
     const { canvasId } = useParams();
+    const { broadcastShapeAdd, broadcastShapeUpdate } =
+      useRealtimeChannel(canvasId);
 
     const getCanvasPoint = useCallback((e: React.MouseEvent): Point => {
       const rect = e.currentTarget.getBoundingClientRect();
@@ -112,10 +115,23 @@ export const EditorCanvas = forwardRef<HTMLDivElement, CanvasProps>(
       if (!canvasId) return;
 
       if (resize.isResizing) {
+        const selectedShape = shapes.find(
+          (shape) => shape.id === selectedShapeId
+        );
+        if (selectedShape) {
+          broadcastShapeUpdate(selectedShape);
+        }
         endResize();
         return;
       }
+
       if (drag.isDragging) {
+        const selectedShape = shapes.find(
+          (shape) => shape.id === selectedShapeId
+        );
+        if (selectedShape) {
+          broadcastShapeUpdate(selectedShape);
+        }
         endDragging();
         return;
       }
@@ -162,6 +178,7 @@ export const EditorCanvas = forwardRef<HTMLDivElement, CanvasProps>(
         try {
           shapeService.createShape(canvasId, newShape);
           addShape(newShape);
+          broadcastShapeAdd(newShape);
         } catch (error) {
           console.error("Failed to create shape:", error);
         }
@@ -171,13 +188,17 @@ export const EditorCanvas = forwardRef<HTMLDivElement, CanvasProps>(
       canvasId,
       resize.isResizing,
       drag.isDragging,
-      endResize,
-      endDragging,
       mouse,
       selectedTool,
       toolSettings,
+      shapes,
+      selectedShapeId,
       addShape,
       endDrawing,
+      endResize,
+      endDragging,
+      broadcastShapeAdd,
+      broadcastShapeUpdate,
     ]);
 
     const handleStartResize = useCallback(
