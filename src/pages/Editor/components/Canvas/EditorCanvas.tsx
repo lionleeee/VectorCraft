@@ -1,4 +1,4 @@
-import { forwardRef, useCallback } from "react";
+import { forwardRef, useCallback, useEffect } from "react";
 import { CanvasProps } from "@/types/components/canvas";
 import { useEditorStore } from "@/store/useEditorStore";
 import { Point } from "@/types/mouse";
@@ -37,6 +37,9 @@ export const EditorCanvas = forwardRef<HTMLDivElement, CanvasProps>(
       updateResize,
       endResize,
     } = useEditorStore();
+    useEffect(() => {
+      console.log("backgroundColor", backgroundColor);
+    }, [backgroundColor]);
 
     const getCanvasPoint = useCallback((e: React.MouseEvent): Point => {
       const rect = e.currentTarget.getBoundingClientRect();

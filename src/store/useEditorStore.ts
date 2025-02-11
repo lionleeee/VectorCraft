@@ -56,6 +56,23 @@ interface EditorState {
   updateResize: (point: Point) => void;
   endResize: () => void;
   reset: () => void;
+  canvasProps: {
+    width?: number;
+    height?: number;
+    backgroundColor?: string;
+  } | null;
+  setCanvasProps: (props: EditorState["canvasProps"]) => void;
+  updateBackgroundColor: (color: string) => void;
+  backgroundColor: string;
+  setBackgroundColor: (color: string) => void;
+  newCanvas: {
+    width: number;
+    height: number;
+    backgroundColor: string;
+  };
+  setNewCanvasWidth: (width: number) => void;
+  setNewCanvasHeight: (height: number) => void;
+  setNewCanvasBackgroundColor: (color: string) => void;
 }
 
 export const useEditorStore = create<EditorState>((set) => ({
@@ -344,4 +361,40 @@ export const useEditorStore = create<EditorState>((set) => ({
         initialShape: null,
       },
     }),
+
+  canvasProps: null,
+
+  setCanvasProps: (props) => set({ canvasProps: props }),
+
+  updateBackgroundColor: (color) =>
+    set((state) => ({
+      canvasProps: state.canvasProps
+        ? { ...state.canvasProps, backgroundColor: color }
+        : null,
+    })),
+
+  backgroundColor: "#FFFFFF",
+
+  setBackgroundColor: (color: string) => set({ backgroundColor: color }),
+
+  newCanvas: {
+    width: 600,
+    height: 600,
+    backgroundColor: "#FFFFFF",
+  },
+
+  setNewCanvasWidth: (width: number) =>
+    set((state) => ({
+      newCanvas: { ...state.newCanvas, width },
+    })),
+
+  setNewCanvasHeight: (height: number) =>
+    set((state) => ({
+      newCanvas: { ...state.newCanvas, height },
+    })),
+
+  setNewCanvasBackgroundColor: (backgroundColor: string) =>
+    set((state) => ({
+      newCanvas: { ...state.newCanvas, backgroundColor },
+    })),
 }));

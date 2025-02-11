@@ -5,24 +5,19 @@ import { nanoid } from "nanoid";
 import { useEditorStore } from "@/store/useEditorStore";
 import { realtimeManager } from "@/lib/realtime";
 
-interface CanvasProps {
-  width?: number;
-  height?: number;
-  backgroundColor?: string;
-}
-
 export const useCanvas = (canvasId: string | undefined) => {
   const [isLoading, setIsLoading] = useState(true);
   const [showCanvasModal, setShowCanvasModal] = useState(!canvasId);
-  const [canvasProps, setCanvasProps] = useState<CanvasProps>();
+  const [width, setWidth] = useState<number>();
+  const [height, setHeight] = useState<number>();
   const navigate = useNavigate();
+  const { setBackgroundColor } = useEditorStore();
 
   useEffect(() => {
     const loadCanvas = async () => {
       if (!canvasId) return;
 
       try {
-        //supabase에서 캔버스 정보 가져오기
         const { data: canvas, error } = await supabase
           .from("canvases")
           .select("*")
@@ -34,18 +29,16 @@ export const useCanvas = (canvasId: string | undefined) => {
           return;
         }
 
-        setCanvasProps({
-          width: canvas.width,
-          height: canvas.height,
-          backgroundColor: canvas.background_color,
-        });
+        setWidth(canvas.width);
+        setHeight(canvas.height);
+        setBackgroundColor(canvas.background_color);
       } finally {
         setIsLoading(false);
       }
     };
 
     loadCanvas();
-  }, [canvasId, navigate]);
+  }, [canvasId, navigate, setBackgroundColor]);
 
   //캔버스 생성
   const handleCreateCanvas = async (
@@ -65,7 +58,9 @@ export const useCanvas = (canvasId: string | undefined) => {
       background_color: backgroundColor,
     });
 
-    setCanvasProps({ width, height, backgroundColor });
+    setWidth(width);
+    setHeight(height);
+    setBackgroundColor(backgroundColor);
   };
 
   //캔버스 배경색 변경
@@ -77,11 +72,8 @@ export const useCanvas = (canvasId: string | undefined) => {
       .update({ background_color: color })
       .eq("id", canvasId);
 
-    setCanvasProps((prev) =>
-      prev ? { ...prev, backgroundColor: color } : prev
-    );
+    setBackgroundColor(color);
 
-    // 브로드캐스트는 useRealtimeChannel에서 처리하도록 변경
     realtimeManager.broadcastCanvas({
       type: "updateBackground",
       backgroundColor: color,
@@ -92,17 +84,18 @@ export const useCanvas = (canvasId: string | undefined) => {
   const handleResetCanvas = () => {
     useEditorStore.getState().reset();
     setShowCanvasModal(true);
-    setCanvasProps(undefined);
+    setWidth(undefined);
+    setHeight(undefined);
   };
 
   return {
     isLoading,
     showCanvasModal,
-    canvasProps,
+    width,
+    height,
     setShowCanvasModal,
     handleCreateCanvas,
     handleChangeBackgroundColor,
     handleResetCanvas,
-    setCanvasProps,
   };
 };

@@ -2,11 +2,10 @@ import { useEffect } from "react";
 import { useEditorStore } from "@/store/useEditorStore";
 import { realtimeManager } from "@/lib/realtime";
 import { Shape } from "@/types/shape";
-import { useCanvas } from "@/hooks/useCanvas";
 
 export const useRealtimeChannel = (canvasId: string | undefined) => {
-  const { addShape, updateShape, deleteShape } = useEditorStore();
-  const { setCanvasProps } = useCanvas(canvasId);
+  const { addShape, updateShape, deleteShape, setBackgroundColor } =
+    useEditorStore();
 
   useEffect(() => {
     if (!canvasId) return;
@@ -35,10 +34,7 @@ export const useRealtimeChannel = (canvasId: string | undefined) => {
       })
       .on("broadcast", { event: "canvas" }, ({ payload }) => {
         if (payload.type === "updateBackground") {
-          console.log("updateBackground", payload);
-          setCanvasProps((prev) =>
-            prev ? { ...prev, backgroundColor: payload.backgroundColor } : prev
-          );
+          setBackgroundColor(payload.backgroundColor);
         }
       })
       .subscribe();
@@ -46,7 +42,7 @@ export const useRealtimeChannel = (canvasId: string | undefined) => {
     return () => {
       realtimeManager.disconnect();
     };
-  }, [canvasId, addShape, updateShape, deleteShape, setCanvasProps]);
+  }, [canvasId, addShape, updateShape, deleteShape, setBackgroundColor]);
 
   return {
     broadcastShapeAdd: (shape: Shape) =>

@@ -12,16 +12,19 @@ import { EditorCanvas } from "./components/Canvas/EditorCanvas";
 import { Header } from "./components/Layout/Header";
 import { useCanvas } from "@/hooks/useCanvas";
 import { useRealtimeChannel } from "@/hooks/useRealtimeChannel";
+import { useEditorStore } from "@/store/useEditorStore";
 
 export const EditorPage = () => {
   const { canvasId } = useParams();
   const canvasRef = useRef<HTMLDivElement>(null);
   useRealtimeChannel(canvasId);
 
+  const backgroundColor = useEditorStore((state) => state.backgroundColor);
   const {
     isLoading,
     showCanvasModal,
-    canvasProps,
+    width,
+    height,
     setShowCanvasModal,
     handleCreateCanvas,
     handleChangeBackgroundColor,
@@ -40,11 +43,16 @@ export const EditorPage = () => {
           <ToolPanel />
         </PanelContainer>
         <Content>
-          <EditorCanvas {...canvasProps} ref={canvasRef} />
+          <EditorCanvas
+            width={width}
+            height={height}
+            backgroundColor={backgroundColor}
+            ref={canvasRef}
+          />
         </Content>
         <PanelContainer position="right" width={256} className="p-4">
           <SettingsPanel
-            backgroundColor={canvasProps?.backgroundColor || "#FFFFFF"}
+            backgroundColor={backgroundColor}
             onChangeBackgroundColor={handleChangeBackgroundColor}
           />
         </PanelContainer>
