@@ -5,7 +5,7 @@ import { realtimeManager } from "@/lib/realtime";
 import { Shape } from "@/types/shape";
 
 export const useRealtimeChannel = (canvasId: string | undefined) => {
-  const { addShape, updateShape, deleteShape } = useShapeStore();
+  const { addShape, updateShape, deleteShape, reset } = useShapeStore();
   const { setBackgroundColor } = useCanvasStore();
 
   useEffect(() => {
@@ -15,8 +15,8 @@ export const useRealtimeChannel = (canvasId: string | undefined) => {
       try {
         const { channel, shapes } = await realtimeManager.initialize(canvasId);
 
+        reset();
         shapes.forEach(addShape);
-        console.log("shapes", shapes);
 
         channel
           .on("broadcast", { event: "shape" }, ({ payload }) => {
@@ -54,7 +54,7 @@ export const useRealtimeChannel = (canvasId: string | undefined) => {
     return () => {
       realtimeManager.disconnect();
     };
-  }, [canvasId, addShape, updateShape, deleteShape, setBackgroundColor]);
+  }, [canvasId, addShape, updateShape, deleteShape, setBackgroundColor, reset]);
 
   return {
     broadcastShapeAdd: (shape: Shape) =>

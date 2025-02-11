@@ -23,7 +23,11 @@ export const shapeService = {
       throw error;
     }
 
-    return shapes.map((shape) => shape.shape_data as Shape);
+    console.log("shapes", shapes);
+    return shapes.map((shape) => ({
+      ...shape.shape_data,
+      id: shape.id,
+    }));
   },
 
   async createShape(canvasId: string, shape: Shape) {
@@ -57,11 +61,13 @@ export const shapeService = {
   },
 
   async deleteShape(shapeId: string) {
+    console.log("shapeId", shapeId);
     const { error } = await supabase
       .from("shapes")
       .update({ deleted_at: new Date().toISOString() })
       .eq("id", shapeId);
 
+    console.log("error", error);
     if (error) {
       throw error;
     }

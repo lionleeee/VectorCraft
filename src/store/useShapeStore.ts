@@ -65,7 +65,7 @@ export const useShapeStore = create<ShapeState>((set) => ({
 
   addShape: (shape) =>
     set((state) => ({
-      shapes: [...state.shapes, { ...shape, id: nanoid() }],
+      shapes: [...state.shapes, { ...shape, id: shape.id || nanoid() }],
     })),
 
   updateShape: (id, updates) =>
