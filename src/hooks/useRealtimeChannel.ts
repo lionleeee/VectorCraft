@@ -6,40 +6,50 @@ import { Shape } from "@/types/shape";
 
 export const useRealtimeChannel = (canvasId: string | undefined) => {
   const { addShape, updateShape, deleteShape } = useShapeStore();
-
   const { setBackgroundColor } = useCanvasStore();
 
   useEffect(() => {
     if (!canvasId) return;
 
-    const channel = realtimeManager.initialize(canvasId);
+    const initializeRealtime = async () => {
+      try {
+        const { channel, shapes } = await realtimeManager.initialize(canvasId);
 
-    channel
-      .on("broadcast", { event: "shape" }, ({ payload }) => {
-        switch (payload.type) {
-          case "add":
-            if (payload.shape) {
-              addShape(payload.shape);
+        // 초기 도형 데이터 설정
+        shapes.forEach(addShape);
+
+        channel
+          .on("broadcast", { event: "shape" }, ({ payload }) => {
+            switch (payload.type) {
+              case "add":
+                if (payload.shape) {
+                  addShape(payload.shape);
+                }
+                break;
+              case "update":
+                if (payload.shape) {
+                  updateShape(payload.shape.id, payload.shape);
+                }
+                break;
+              case "delete":
+                if (payload.shapeId) {
+                  deleteShape(payload.shapeId);
+                }
+                break;
             }
-            break;
-          case "update":
-            if (payload.shape) {
-              updateShape(payload.shape.id, payload.shape);
+          })
+          .on("broadcast", { event: "canvas" }, ({ payload }) => {
+            if (payload.type === "updateBackground") {
+              setBackgroundColor(payload.backgroundColor);
             }
-            break;
-          case "delete":
-            if (payload.shapeId) {
-              deleteShape(payload.shapeId);
-            }
-            break;
-        }
-      })
-      .on("broadcast", { event: "canvas" }, ({ payload }) => {
-        if (payload.type === "updateBackground") {
-          setBackgroundColor(payload.backgroundColor);
-        }
-      })
-      .subscribe();
+          })
+          .subscribe();
+      } catch (error) {
+        console.error("초기화 실패:", error);
+      }
+    };
+
+    initializeRealtime();
 
     return () => {
       realtimeManager.disconnect();

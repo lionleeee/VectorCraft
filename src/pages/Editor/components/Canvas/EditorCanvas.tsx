@@ -3,6 +3,7 @@ import { CanvasProps } from "@/types/components/canvas";
 import { useShapeStore } from "@/store/useShapeStore";
 import { useToolStore } from "@/store/useToolStore";
 import { Point } from "@/types/mouse";
+import { useParams } from "react-router-dom";
 
 import {
   CircleShape,
@@ -15,6 +16,7 @@ import { calculateShapeDimensions } from "@/utils/shapeCalculator";
 import { Preview } from "./Preview";
 import { Selection } from "./Selection";
 import { isPointInShape, shapeComponentsMapper } from "@/utils/shapeHelpers";
+import { shapeService } from "@/services/shapeService";
 
 export const EditorCanvas = forwardRef<HTMLDivElement, CanvasProps>(
   ({ width, height, backgroundColor }, ref) => {
@@ -38,6 +40,7 @@ export const EditorCanvas = forwardRef<HTMLDivElement, CanvasProps>(
     } = useShapeStore();
 
     const { selectedTool, toolSettings } = useToolStore();
+    const { canvasId } = useParams();
 
     const getCanvasPoint = useCallback((e: React.MouseEvent): Point => {
       const rect = e.currentTarget.getBoundingClientRect();
@@ -106,6 +109,8 @@ export const EditorCanvas = forwardRef<HTMLDivElement, CanvasProps>(
     );
 
     const handleMouseUp = useCallback(() => {
+      if (!canvasId) return;
+
       if (resize.isResizing) {
         endResize();
         return;
@@ -153,9 +158,17 @@ export const EditorCanvas = forwardRef<HTMLDivElement, CanvasProps>(
           } as PolygonShape,
         }[selectedTool] ?? null;
 
-      if (newShape) addShape(newShape);
+      if (newShape) {
+        try {
+          shapeService.createShape(canvasId, newShape);
+          addShape(newShape);
+        } catch (error) {
+          console.error("Failed to create shape:", error);
+        }
+      }
       endDrawing();
     }, [
+      canvasId,
       resize.isResizing,
       drag.isDragging,
       endResize,

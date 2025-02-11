@@ -1,10 +1,10 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { supabase } from "@/lib/supabase";
 import { nanoid } from "nanoid";
 import { useCanvasStore } from "@/store/useCanvasStore";
 import { useShapeStore } from "@/store/useShapeStore";
 import { realtimeManager } from "@/lib/realtime";
+import { canvasService } from "@/services/canvasService";
 
 export const useCanvas = (canvasId: string | undefined) => {
   const [isLoading, setIsLoading] = useState(true);
@@ -19,19 +19,12 @@ export const useCanvas = (canvasId: string | undefined) => {
       if (!canvasId) return;
 
       try {
-        const { data: canvas, error } = await supabase
-          .from("canvases")
-          .select("*")
-          .eq("id", canvasId)
-          .single();
-
-        if (error) {
-          navigate("/editor");
-          return;
-        }
-
+        const canvas = await canvasService.getCanvas(canvasId);
         setDimensions(canvas.width, canvas.height);
         setBackgroundColor(canvas.background_color);
+      } catch (error) {
+        console.error("요청 실패", error);
+        navigate("/editor");
       } finally {
         setIsLoading(false);
       }
@@ -40,7 +33,6 @@ export const useCanvas = (canvasId: string | undefined) => {
     loadCanvas();
   }, [canvasId, navigate, setBackgroundColor, setDimensions]);
 
-  //캔버스 생성
   const handleCreateCanvas = async (
     width: number,
     height: number,
@@ -48,38 +40,38 @@ export const useCanvas = (canvasId: string | undefined) => {
   ) => {
     const newCanvasId = nanoid(10);
 
-    navigate(`/editor/${newCanvasId}`);
-    setShowCanvasModal(false);
+    try {
+      await canvasService.createCanvas({
+        id: newCanvasId,
+        width,
+        height,
+        background_color: backgroundColor,
+      });
 
-    await supabase.from("canvases").insert({
-      id: newCanvasId,
-      width,
-      height,
-      background_color: backgroundColor,
-    });
-
-    setDimensions(width, height);
-    setBackgroundColor(backgroundColor);
+      navigate(`/editor/${newCanvasId}`);
+      setShowCanvasModal(false);
+      setDimensions(width, height);
+      setBackgroundColor(backgroundColor);
+    } catch (error) {
+      console.error("Failed to create canvas:", error);
+    }
   };
 
-  //캔버스 배경색 변경
   const handleChangeBackgroundColor = async (color: string) => {
     if (!canvasId) return;
 
-    await supabase
-      .from("canvases")
-      .update({ background_color: color })
-      .eq("id", canvasId);
-
-    setBackgroundColor(color);
-
-    realtimeManager.broadcastCanvas({
-      type: "updateBackground",
-      backgroundColor: color,
-    });
+    try {
+      await canvasService.updateBackgroundColor(canvasId, color);
+      setBackgroundColor(color);
+      realtimeManager.broadcastCanvas({
+        type: "updateBackground",
+        backgroundColor: color,
+      });
+    } catch (error) {
+      console.error("Failed to update background color:", error);
+    }
   };
 
-  //캔버스 리셋
   const handleResetCanvas = () => {
     resetShapes();
     setShowCanvasModal(true);

@@ -1,6 +1,7 @@
 import { supabase } from "./supabase";
 import { RealtimeChannel } from "@supabase/supabase-js";
 import { Shape } from "@/types/shape";
+import { shapeService } from "@/services/shapeService";
 
 type ShapeEvent = {
   type: "add" | "update" | "delete";
@@ -16,18 +17,30 @@ type CanvasEvent = {
 class RealtimeManager {
   private channel: RealtimeChannel | null = null;
 
-  initialize(canvasId: string) {
+  async initialize(canvasId: string) {
     if (this.channel) {
       this.channel.unsubscribe();
     }
 
-    this.channel = supabase.channel(`canvas:${canvasId}`, {
-      config: {
-        broadcast: { self: true },
-      },
-    });
+    try {
+      // 도형 데이터 로드
+      const shapes = await shapeService.getShapes(canvasId);
 
-    return this.channel;
+      // 채널 초기화
+      this.channel = supabase.channel(`canvas:${canvasId}`, {
+        config: {
+          broadcast: { self: true },
+        },
+      });
+
+      return {
+        channel: this.channel,
+        shapes,
+      };
+    } catch (error) {
+      console.error("초기화 실패:", error);
+      throw error;
+    }
   }
 
   broadcastShape(event: ShapeEvent) {
