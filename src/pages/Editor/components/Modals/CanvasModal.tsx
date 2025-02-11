@@ -1,6 +1,7 @@
 import { Button } from "@/components/common/Button/Button";
 import { CreateCanvasModalProps } from "@/types/components/modal";
-import { useEditorStore } from "@/store/useEditorStore";
+
+import { useCanvasStore } from "@/store/useCanvasStore";
 
 export const CreateCanvasModal = ({
   onClose,
@@ -11,7 +12,7 @@ export const CreateCanvasModal = ({
     setNewCanvasWidth,
     setNewCanvasHeight,
     setNewCanvasBackgroundColor,
-  } = useEditorStore();
+  } = useCanvasStore();
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
