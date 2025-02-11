@@ -11,10 +11,13 @@ import { CreateCanvasModal } from "@/pages/Editor/components/Modals/CanvasModal"
 import { EditorCanvas } from "./components/Canvas/EditorCanvas";
 import { Header } from "./components/Layout/Header";
 import { useCanvas } from "@/hooks/useCanvas";
+import { useRealtimeChannel } from "@/hooks/useRealtimeChannel";
 
 export const EditorPage = () => {
   const { canvasId } = useParams();
   const canvasRef = useRef<HTMLDivElement>(null);
+  useRealtimeChannel(canvasId);
+
   const {
     isLoading,
     showCanvasModal,

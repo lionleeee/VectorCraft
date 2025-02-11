@@ -3,6 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { supabase } from "@/lib/supabase";
 import { nanoid } from "nanoid";
 import { useEditorStore } from "@/store/useEditorStore";
+import { realtimeManager } from "@/lib/realtime";
 
 interface CanvasProps {
   width?: number;
@@ -68,10 +69,23 @@ export const useCanvas = (canvasId: string | undefined) => {
   };
 
   //캔버스 배경색 변경
-  const handleChangeBackgroundColor = (color: string) => {
+  const handleChangeBackgroundColor = async (color: string) => {
+    if (!canvasId) return;
+
+    await supabase
+      .from("canvases")
+      .update({ background_color: color })
+      .eq("id", canvasId);
+
     setCanvasProps((prev) =>
       prev ? { ...prev, backgroundColor: color } : prev
     );
+
+    // 브로드캐스트는 useRealtimeChannel에서 처리하도록 변경
+    realtimeManager.broadcastCanvas({
+      type: "updateBackground",
+      backgroundColor: color,
+    });
   };
 
   //캔버스 리셋
@@ -89,5 +103,6 @@ export const useCanvas = (canvasId: string | undefined) => {
     handleCreateCanvas,
     handleChangeBackgroundColor,
     handleResetCanvas,
+    setCanvasProps,
   };
 };

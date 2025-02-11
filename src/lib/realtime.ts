@@ -8,6 +8,11 @@ type ShapeEvent = {
   shapeId?: string;
 };
 
+type CanvasEvent = {
+  type: "updateBackground";
+  backgroundColor: string;
+};
+
 class RealtimeManager {
   private channel: RealtimeChannel | null = null;
 
@@ -29,6 +34,15 @@ class RealtimeManager {
     this.channel?.send({
       type: "broadcast",
       event: "shape",
+      payload: event,
+    });
+  }
+
+  broadcastCanvas(event: CanvasEvent) {
+    console.log("broadcastCanvas", event);
+    this.channel?.send({
+      type: "broadcast",
+      event: "canvas",
       payload: event,
     });
   }
