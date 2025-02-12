@@ -23,7 +23,6 @@ export const shapeService = {
       throw error;
     }
 
-    console.log("shapes", shapes);
     return shapes.map((shape) => ({
       ...shape.shape_data,
       id: shape.id,
@@ -61,13 +60,11 @@ export const shapeService = {
   },
 
   async deleteShape(shapeId: string) {
-    console.log("shapeId", shapeId);
     const { error } = await supabase
       .from("shapes")
       .update({ deleted_at: new Date().toISOString() })
       .eq("id", shapeId);
 
-    console.log("error", error);
     if (error) {
       throw error;
     }

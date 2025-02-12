@@ -30,7 +30,6 @@ export const EditorCanvas = forwardRef<HTMLDivElement, CanvasProps>(
       startDrawing,
       updateDrawing,
       endDrawing,
-      addShape,
       selectShape,
       startDragging,
       updateDragging,
@@ -187,7 +186,7 @@ export const EditorCanvas = forwardRef<HTMLDivElement, CanvasProps>(
       if (newShape) {
         try {
           shapeService.createShape(canvasId, newShape);
-          addShape(newShape);
+
           broadcastShapeAdd(newShape);
         } catch (error) {
           console.error("Failed to create shape:", error);
@@ -203,7 +202,7 @@ export const EditorCanvas = forwardRef<HTMLDivElement, CanvasProps>(
       toolSettings,
       shapes,
       selectedShapeId,
-      addShape,
+
       endDrawing,
       endResize,
       endDragging,
