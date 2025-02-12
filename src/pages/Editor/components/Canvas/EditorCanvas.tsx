@@ -5,6 +5,7 @@ import { useToolStore } from "@/store/useToolStore";
 import { Point } from "@/types/mouse";
 import { useParams } from "react-router-dom";
 import { useRealtimeChannel } from "@/hooks/useRealtimeChannel";
+import { nanoid } from "nanoid";
 
 import {
   CircleShape,
@@ -163,22 +164,26 @@ export const EditorCanvas = forwardRef<HTMLDivElement, CanvasProps>(
       });
 
       const baseToolSettings = toolSettings[selectedTool];
+      const shapeId = nanoid();
 
       const newShape =
         {
           rectangle: {
             ...baseToolSettings,
+            id: shapeId,
             type: "rectangle" as const,
             borderRadius: 0,
             ...dimensions,
           } as RectangleShape,
           circle: {
             ...baseToolSettings,
+            id: shapeId,
             type: "circle" as const,
             ...dimensions,
           } as CircleShape,
           polygon: {
             ...baseToolSettings,
+            id: shapeId,
             type: "polygon" as const,
             ...dimensions,
           } as PolygonShape,
