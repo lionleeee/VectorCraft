@@ -29,7 +29,7 @@ class RealtimeManager {
       // 채널 초기화
       this.channel = supabase.channel(`canvas:${canvasId}`, {
         config: {
-          broadcast: { self: true },
+          broadcast: { self: false },
         },
       });
 
