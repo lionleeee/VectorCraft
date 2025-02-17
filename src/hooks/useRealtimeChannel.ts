@@ -3,13 +3,15 @@ import { useShapeStore } from "@/store/useShapeStore";
 import { useCanvasStore } from "@/store/useCanvasStore";
 import { realtimeManager } from "@/lib/realtime";
 import { Shape } from "@/types/shape";
+import { useNavigate } from "react-router-dom";
 
 export const useRealtimeChannel = (canvasId: string | undefined) => {
   const { addShape, updateShape, deleteShape, reset } = useShapeStore();
   const { setBackgroundColor } = useCanvasStore();
+  const navigate = useNavigate();
 
+  const initializedCanvasRef = useRef<string | null>(null);
   const stateRef = useRef({
-    isInitialized: false,
     actions: {
       addShape,
       updateShape,
@@ -20,25 +22,13 @@ export const useRealtimeChannel = (canvasId: string | undefined) => {
   });
 
   useEffect(() => {
-    stateRef.current.actions = {
-      addShape,
-      updateShape,
-      deleteShape,
-      reset,
-      setBackgroundColor,
-    };
-  }, [addShape, updateShape, deleteShape, reset, setBackgroundColor]);
-
-  useEffect(() => {
-    if (!canvasId) return;
+    if (!canvasId || initializedCanvasRef.current === canvasId) return;
 
     const state = stateRef.current;
     const initializeRealtime = async () => {
-      if (state.isInitialized) return;
-
       try {
         const { channel, shapes } = await realtimeManager.initialize(canvasId);
-        state.isInitialized = true;
+        initializedCanvasRef.current = canvasId;
 
         const { reset, addShape } = state.actions;
         reset();
@@ -72,7 +62,9 @@ export const useRealtimeChannel = (canvasId: string | undefined) => {
           })
           .subscribe();
       } catch (error) {
-        console.error("초기화 실패:", error);
+        console.error("실시간 연결 실패:", error);
+        alert("실시간 연결 실패");
+        navigate("/editor");
       }
     };
 
@@ -80,9 +72,8 @@ export const useRealtimeChannel = (canvasId: string | undefined) => {
 
     return () => {
       realtimeManager.disconnect();
-      state.isInitialized = false;
     };
-  }, [canvasId]);
+  }, [canvasId, navigate]);
 
   return {
     broadcastShapeAdd: (shape: Shape) =>
