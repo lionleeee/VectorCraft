@@ -1,5 +1,4 @@
 import { supabase } from "@/lib/supabase";
-import { CanvasUpdate } from "@/types/canvas";
 
 interface CreateCanvasData {
   id: string;
@@ -7,6 +6,13 @@ interface CreateCanvasData {
   height: number;
   background_color: string;
 }
+
+type CanvasUpdateData = Partial<{
+  width: number;
+  height: number;
+  background_color: string;
+  title: string;
+}>;
 
 export const canvasService = {
   async getCanvas(canvasId: string) {
@@ -31,18 +37,14 @@ export const canvasService = {
     }
   },
 
-  async updateCanvas(canvasId: string, updates: Partial<CanvasUpdate>) {
+  async updateCanvas(canvasId: string, updateData: CanvasUpdateData) {
     const { error } = await supabase
       .from("canvases")
-      .update(updates)
+      .update(updateData)
       .eq("id", canvasId);
 
     if (error) {
       throw error;
     }
-  },
-
-  async updateBackgroundColor(canvasId: string, backgroundColor: string) {
-    return this.updateCanvas(canvasId, { background_color: backgroundColor });
   },
 };

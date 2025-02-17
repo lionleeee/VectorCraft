@@ -75,7 +75,7 @@ export const useCanvas = (canvasId: string | undefined) => {
     if (!canvasId) return;
 
     try {
-      await canvasService.updateBackgroundColor(canvasId, color);
+      await canvasService.updateCanvas(canvasId, { background_color: color });
       storeActionsRef.current.setBackgroundColor(color);
       realtimeManager.broadcastCanvas({
         type: "updateBackground",
