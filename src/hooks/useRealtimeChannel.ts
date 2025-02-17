@@ -1,4 +1,4 @@
-import { useEffect } from "react";
+import { useEffect, useRef } from "react";
 import { useShapeStore } from "@/store/useShapeStore";
 import { useCanvasStore } from "@/store/useCanvasStore";
 import { realtimeManager } from "@/lib/realtime";
@@ -8,18 +8,45 @@ export const useRealtimeChannel = (canvasId: string | undefined) => {
   const { addShape, updateShape, deleteShape, reset } = useShapeStore();
   const { setBackgroundColor } = useCanvasStore();
 
+  const stateRef = useRef({
+    isInitialized: false,
+    actions: {
+      addShape,
+      updateShape,
+      deleteShape,
+      reset,
+      setBackgroundColor,
+    },
+  });
+
+  useEffect(() => {
+    stateRef.current.actions = {
+      addShape,
+      updateShape,
+      deleteShape,
+      reset,
+      setBackgroundColor,
+    };
+  }, [addShape, updateShape, deleteShape, reset, setBackgroundColor]);
+
   useEffect(() => {
     if (!canvasId) return;
 
+    const state = stateRef.current;
     const initializeRealtime = async () => {
+      if (state.isInitialized) return;
+
       try {
         const { channel, shapes } = await realtimeManager.initialize(canvasId);
+        state.isInitialized = true;
 
+        const { reset, addShape } = state.actions;
         reset();
         shapes.forEach(addShape);
 
         channel
           .on("broadcast", { event: "shape" }, ({ payload }) => {
+            const { addShape, updateShape, deleteShape } = state.actions;
             switch (payload.type) {
               case "add":
                 if (payload.shape) {
@@ -40,7 +67,7 @@ export const useRealtimeChannel = (canvasId: string | undefined) => {
           })
           .on("broadcast", { event: "canvas" }, ({ payload }) => {
             if (payload.type === "updateBackground") {
-              setBackgroundColor(payload.backgroundColor);
+              state.actions.setBackgroundColor(payload.backgroundColor);
             }
           })
           .subscribe();
@@ -53,8 +80,9 @@ export const useRealtimeChannel = (canvasId: string | undefined) => {
 
     return () => {
       realtimeManager.disconnect();
+      state.isInitialized = false;
     };
-  }, [canvasId, addShape, updateShape, deleteShape, setBackgroundColor, reset]);
+  }, [canvasId]);
 
   return {
     broadcastShapeAdd: (shape: Shape) =>
