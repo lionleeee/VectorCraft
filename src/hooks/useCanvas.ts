@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import { nanoid } from "nanoid";
 import { useCanvasStore } from "@/store/useCanvasStore";
@@ -14,24 +14,38 @@ export const useCanvas = (canvasId: string | undefined) => {
   const { setBackgroundColor, setDimensions } = useCanvasStore();
   const { reset: resetShapes } = useShapeStore();
 
+  const storeActionsRef = useRef({
+    setBackgroundColor,
+    setDimensions,
+    navigate,
+  });
+
   useEffect(() => {
-    const loadCanvas = async () => {
-      if (!canvasId) return;
-
-      try {
-        const canvas = await canvasService.getCanvas(canvasId);
-        setDimensions(canvas.width, canvas.height);
-        setBackgroundColor(canvas.background_color);
-      } catch (error) {
-        console.error("요청 실패", error);
-        navigate("/editor");
-      } finally {
-        setIsLoading(false);
-      }
+    storeActionsRef.current = {
+      setBackgroundColor,
+      setDimensions,
+      navigate,
     };
+  }, [setBackgroundColor, setDimensions, navigate]);
 
+  const loadCanvas = useCallback(async () => {
+    if (!canvasId) return;
+
+    try {
+      const canvas = await canvasService.getCanvas(canvasId);
+      storeActionsRef.current.setDimensions(canvas.width, canvas.height);
+      storeActionsRef.current.setBackgroundColor(canvas.background_color);
+    } catch (error) {
+      console.error("요청 실패", error);
+      storeActionsRef.current.navigate("/editor");
+    } finally {
+      setIsLoading(false);
+    }
+  }, [canvasId]);
+
+  useEffect(() => {
     loadCanvas();
-  }, [canvasId, navigate, setBackgroundColor, setDimensions]);
+  }, [loadCanvas]);
 
   const handleCreateCanvas = async (
     width: number,
@@ -48,10 +62,10 @@ export const useCanvas = (canvasId: string | undefined) => {
         background_color: backgroundColor,
       });
 
-      navigate(`/editor/${newCanvasId}`);
+      storeActionsRef.current.navigate(`/editor/${newCanvasId}`);
       setShowCanvasModal(false);
-      setDimensions(width, height);
-      setBackgroundColor(backgroundColor);
+      storeActionsRef.current.setDimensions(width, height);
+      storeActionsRef.current.setBackgroundColor(backgroundColor);
     } catch (error) {
       console.error("Failed to create canvas:", error);
     }
@@ -62,7 +76,7 @@ export const useCanvas = (canvasId: string | undefined) => {
 
     try {
       await canvasService.updateBackgroundColor(canvasId, color);
-      setBackgroundColor(color);
+      storeActionsRef.current.setBackgroundColor(color);
       realtimeManager.broadcastCanvas({
         type: "updateBackground",
         backgroundColor: color,
@@ -75,8 +89,8 @@ export const useCanvas = (canvasId: string | undefined) => {
   const handleResetCanvas = () => {
     resetShapes();
     setShowCanvasModal(true);
-    setDimensions(0, 0);
-    setBackgroundColor("#FFFFFF");
+    storeActionsRef.current.setDimensions(0, 0);
+    storeActionsRef.current.setBackgroundColor("#FFFFFF");
   };
 
   return {
